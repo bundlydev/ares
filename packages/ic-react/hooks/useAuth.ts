@@ -1,6 +1,6 @@
 import { IcpConnectContext } from "../context";
 import { Identity } from "@dfinity/agent";
-import { AppLinkParams } from "icp-connect-core";
+import { AppLinkParams } from "@bundly/ic-core-js";
 import { useContext } from "react";
 
 export type LoginOptions = {

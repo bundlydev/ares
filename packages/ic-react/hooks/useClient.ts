@@ -1,5 +1,5 @@
 import { IcpConnectContext } from "../context";
-import { Client } from "icp-connect-core";
+import { Client } from "@bundly/ic-core-js";
 import { useContext } from "react";
 
 export const useClient = <T extends Record<string, any>>(): Client<T> => {

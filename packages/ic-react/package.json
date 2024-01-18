@@ -1,23 +1,26 @@
 {
   "name": "@bundly/ic-react",
   "version": "0.1.0",
-  "main": "index.ts",
+  "main": "build/index.js",
   "author": "Bundly",
   "license": "MIT",
   "private": false,
   "scripts": {
+    "build": "webpack --mode production",
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
+    "@bundly/ic-core-js": "^0.1.0",
     "@dfinity/agent": "^0.20.2",
     "@dfinity/auth-client": "^0.20.2",
     "@dfinity/identity": "^0.20.2",
     "@dfinity/principal": "^0.20.2",
-    "@bundly/ic-core-js": "^0.1.0",
     "react": "^18.2.0"
   },
   "devDependencies": {
+    "@types/react": "^18.2.48",
     "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   },

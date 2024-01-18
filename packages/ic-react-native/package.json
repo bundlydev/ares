@@ -6,18 +6,21 @@
   "license": "MIT",
   "private": false,
   "scripts": {
+    "build": "webpack --mode production",
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
+    "@bundly/ic-core-js": "^0.1.0",
     "@dfinity/agent": "^0.20.2",
     "@dfinity/auth-client": "^0.20.2",
     "@dfinity/identity": "^0.20.2",
     "@dfinity/principal": "^0.20.2",
     "@react-native-async-storage/async-storage": "^1.21.0",
     "expo-device": "^5.6.0",
+    "expo-modules-core": "^1.5.12",
     "expo-secure-store": "^12.5.0",
     "expo-web-browser": "^12.5.0",
-    "@bundly/ic-core-js": "^0.1.0"
+    "react-native": "^0.73.2"
   },
   "devDependencies": {
     "ts-loader": "^9.5.1",

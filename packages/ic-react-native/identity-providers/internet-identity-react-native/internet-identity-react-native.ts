@@ -11,7 +11,7 @@ import * as Device from "expo-device";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 
-import { IdentityProvider, AppLinkParams } from "icp-connect-core";
+import { IdentityProvider, AppLinkParams } from "@bundly/ic-core-js";
 
 import { InternetIdentityReactNativeConfig } from "./internet-identity-react-native.types";
 
