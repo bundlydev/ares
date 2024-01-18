@@ -2,10 +2,23 @@
   "name": "@bundly/ic-connect",
   "version": "1.0.0",
   "description": "Monorepo for ic-connectors",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Bundly",
-  "license": "ISC"
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "prettier": "^3.2.4",
+    "turbo": "^1.11.3"
+  }
 }
