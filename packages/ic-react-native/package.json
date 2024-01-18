@@ -1,0 +1,37 @@
+{
+  "name": "@bundly/ic-react-native",
+  "version": "0.1.1",
+  "main": "index.ts",
+  "author": "Bundly",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
+  },
+  "dependencies": {
+    "@dfinity/agent": "^0.20.2",
+    "@dfinity/auth-client": "^0.20.2",
+    "@dfinity/identity": "^0.20.2",
+    "@dfinity/principal": "^0.20.2",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "expo-device": "^5.6.0",
+    "expo-secure-store": "^12.5.0",
+    "expo-web-browser": "^12.5.0",
+    "@bundly/ic-core-js": "^0.1.0"
+  },
+  "devDependencies": {
+    "ts-loader": "^9.5.1",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bundlydev/ic-react-native.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/bundlydev/ic-react-native/issues"
+  },
+  "homepage": "https://github.com/bundlydev/ic-react-native#readme",
+  "description": "Welcome to ic-react-native!"
+}
