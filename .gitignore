@@ -1,0 +1,14 @@
+**/node_modules
+.DS_Store
+**/dist
+**/build
+build/**
+dist/**
+.next/**
+dist-ssr
+*.local
+**/.idea
+**/.dfx
+.turbo
+**/package-lock.json
+**/yarn.lock
