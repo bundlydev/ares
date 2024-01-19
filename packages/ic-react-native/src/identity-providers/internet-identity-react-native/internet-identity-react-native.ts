@@ -11,15 +11,14 @@ import * as Device from "expo-device";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
 
-import { IdentityProvider, AppLinkParams } from "@bundly/ic-core-js";
+import { AppLinkParams, IdentityProvider } from "@bundly/ic-core-js";
 
 import { InternetIdentityReactNativeConfig } from "./internet-identity-react-native.types";
 
 export const KEY_STORAGE_KEY = "identity";
 export const KEY_STORAGE_DELEGATION = "delegation";
 
-// export type StoredKey = string | CryptoKeyPair;
-export type StoredKey = string;
+export type StoredKey = string | CryptoKeyPair;
 
 export class InternetIdentityReactNative implements IdentityProvider {
   public readonly type = "native";
