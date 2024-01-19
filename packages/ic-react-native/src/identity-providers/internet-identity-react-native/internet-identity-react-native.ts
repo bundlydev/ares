@@ -22,7 +22,6 @@ export type StoredKey = string | CryptoKeyPair;
 
 export class InternetIdentityReactNative implements IdentityProvider {
   public readonly type = "native";
-  public name = "Internet Identity";
   private _identity: Identity = new AnonymousIdentity();
   private _key: SignIdentity | null = null;
   private _chain: DelegationChain | null = null;
@@ -62,7 +61,6 @@ export class InternetIdentityReactNative implements IdentityProvider {
 
   private async getChain(): Promise<DelegationChain | undefined> {
     const storedDelegation = await AsyncStorage.getItem(KEY_STORAGE_DELEGATION);
-
     if (storedDelegation) return DelegationChain.fromJSON(JSON.parse(storedDelegation));
   }
 
