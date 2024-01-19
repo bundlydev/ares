@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-react-native",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "main": "build/index.js",
   "author": "Bundly",
   "license": "MIT",
