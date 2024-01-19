@@ -4,7 +4,7 @@ import { Principal } from "@dfinity/principal";
 export type AppLinkParams = {
   publicKey: string;
   delegation: string;
-}
+};
 
 export interface IdentityProvider {
   type: "web" | "native";

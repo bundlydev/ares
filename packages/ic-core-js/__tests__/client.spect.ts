@@ -1,44 +1,53 @@
-import { Client } from "../client";
-import { AnonymousIdentity } from "@dfinity/agent";
+import { Client } from "../src/client";
+import { InternetIdentity } from "../src/identity-providers";
 
 describe("Client", () => {
   it("should instantiate correctly", async () => {
-    const options = {
-      host: "http://127.0.0.1:4943",
+    const config = {
+      agent: {
+        host: "http://127.0.0.1:4943"
+      },
       canisters: {},
-      providers: {},
+      identityProviders: {},
     };
 
-    const client = await Client.create(options);
+    const client = Client.create(config);
 
     expect(client).toBeDefined();
     expect(client instanceof Client).toBe(true);
 
     expect(client.getIdentity()).toBeDefined();
-    expect(client.getProviders()).toBeDefined();
+    expect(client.getIdentityProviders()).toBeDefined();
 
     expect(client.getIdentity().getPrincipal().isAnonymous()).toBe(true);
   });
 
-  it("should assign a new identity correctly", async () => {
-    const options = {
-      host: "http://127.0.0.1:4943",
+  it("should assign a identity correctly", async () => {
+    const internetIdentity = new InternetIdentity({
+      providerUrl: process.env.NEXT_PUBLIC_INTERNET_IDENTITY_URL,
+    });
+
+    const config = {
+      agent: {
+        host: "http://127.0.0.1:4943"
+      },
       canisters: {},
-      providers: {},
+      identityProviders: {
+        "internet_identity": internetIdentity
+      },
     };
 
-    const client = await Client.create(options);
+    const client = Client.create(config);
 
-    const previousIdentity = client.getIdentity();
-    // A new identity should be retrieved after browser authentication.
-    const newIdentity = new AnonymousIdentity();
+    const identityProvider = client.getIdentityProviders()["internet_identity"];
+    await identityProvider.init();
 
-    await client.replaceIdentity(newIdentity);
+    const identity = client.getIdentityProviders()["internet_identity"].getIdentity();
 
-    previousIdentity.getPrincipal().toString();
+    await client.init(identity);
 
-    expect(client.getIdentity().getPrincipal().toString()).not.toBe(
-      previousIdentity.getPrincipal().toString()
+    expect(client.getIdentity().getPrincipal().toString()).toBe(
+      identity.getPrincipal().toString()
     );
   });
 });
