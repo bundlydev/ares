@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-react",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "main": "build/index.js",
   "author": "Bundly",
   "license": "MIT",
@@ -10,7 +10,7 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ic-core-js": "^0.1.0",
+    "@bundly/ic-core-js": "^0.1.3",
     "@dfinity/agent": "^0.20.2",
     "@dfinity/auth-client": "^0.20.2",
     "@dfinity/identity": "^0.20.2",
