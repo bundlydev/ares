@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "npx tsc",
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
@@ -23,9 +23,7 @@
     "react-native": "^0.73.2"
   },
   "devDependencies": {
-    "ts-loader": "^9.5.1",
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4"
+    "typescript": "^5.3.3"
   },
   "repository": {
     "type": "git",

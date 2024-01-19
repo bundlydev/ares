@@ -18,7 +18,8 @@ import { InternetIdentityReactNativeConfig } from "./internet-identity-react-nat
 export const KEY_STORAGE_KEY = "identity";
 export const KEY_STORAGE_DELEGATION = "delegation";
 
-export type StoredKey = string | CryptoKeyPair;
+// export type StoredKey = string | CryptoKeyPair;
+export type StoredKey = string;
 
 export class InternetIdentityReactNative implements IdentityProvider {
   public readonly type = "native";
@@ -49,10 +50,6 @@ export class InternetIdentityReactNative implements IdentityProvider {
     }
   }
 
-  public getName(): string {
-    return this.name;
-  }
-
   private async getKey(): Promise<Ed25519KeyIdentity | undefined> {
     const storedKey = await SecureStore.getItemAsync(KEY_STORAGE_KEY);
 
@@ -66,6 +63,7 @@ export class InternetIdentityReactNative implements IdentityProvider {
 
   private async getChain(): Promise<DelegationChain | undefined> {
     const storedDelegation = await AsyncStorage.getItem(KEY_STORAGE_DELEGATION);
+
     if (storedDelegation) return DelegationChain.fromJSON(JSON.parse(storedDelegation));
   }
 
