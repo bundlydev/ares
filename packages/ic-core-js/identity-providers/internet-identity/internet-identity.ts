@@ -44,10 +44,6 @@ export class InternetIdentity implements IdentityProvider {
     }
   }
 
-  public getName(): string {
-    return this.name;
-  }
-
   public connect(): Promise<void> {
     if (!this.client) throw new Error("init must be called before this method");
 

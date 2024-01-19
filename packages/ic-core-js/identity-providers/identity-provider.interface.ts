@@ -9,7 +9,6 @@ export type AppLinkParams = {
 export interface IdentityProvider {
   type: "web" | "native";
   init: () => Promise<void>;
-  getName: () => string;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
   isAuthenticated: () => boolean;
