@@ -3,9 +3,8 @@ import React, { ReactNode, createContext, useEffect, useState } from "react";
 
 import { AppLinkParams, Client } from "@bundly/ic-core-js";
 
-
-export type IcpConnectContextType<T extends Record<string, any>> = {
-  client: Client<T>;
+export type IcpConnectContextType = {
+  client: Client;
   identity: Identity;
   isAuthenticated: boolean;
   connect: () => Promise<void>;
@@ -13,32 +12,28 @@ export type IcpConnectContextType<T extends Record<string, any>> = {
   onAppLinkOpened(params: AppLinkParams): Promise<void>;
 };
 
-export type IcpConnectContextProviderProps<T extends Record<string, any>> = {
+export type IcpConnectContextProviderProps = {
   children: ReactNode;
-  client: Client<T>;
+  client: Client;
 };
 
-export const IcpConnectContext = createContext<IcpConnectContextType<Record<string, any>>>({} as any);
+export const IcpConnectContext = createContext({} as any);
 
-export const IcpConnectContextProvider = <T extends Record<string, any>>({
-  children,
-  client,
-}: IcpConnectContextProviderProps<T>) => {
+export const IcpConnectContextProvider = ({ children, client }: IcpConnectContextProviderProps) => {
   const [isReady, setIsReady] = useState<boolean>(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [identity, setIdentity] = useState<Identity>(new AnonymousIdentity());
 
-  const currentProvider = client.getProviders()["internet-identity"];
+  const currentProvider = client.getIdentityProviders()["internet-identity"];
 
   useEffect(() => {
     async function bootstrap() {
-      await client.init();
       await currentProvider.init();
-
       const identity = currentProvider.getIdentity();
 
-      await client.replaceIdentity(identity);
+      await client.init(identity);
+
       setIdentity(identity);
 
       if (!identity.getPrincipal().isAnonymous()) {
