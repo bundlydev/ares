@@ -19,7 +19,7 @@ export class Client<T extends Record<string, unknown>> {
       host: this.host.origin,
       identity: new AnonymousIdentity(),
       // TODO: try to remove this
-      verifyQuerySignatures: false
+      verifyQuerySignatures: false,
     });
   }
 
@@ -46,7 +46,8 @@ export class Client<T extends Record<string, unknown>> {
     const ngrokHostName = /^.*\.ngrok-free\.app$/;
     const localtunelHostName = /^.*\.loca\.lt$/;
 
-    const isLocal = localHostNames.includes(hostname) || ngrokHostName.test(hostname) || localtunelHostName.test(hostname);
+    const isLocal =
+      localHostNames.includes(hostname) || ngrokHostName.test(hostname) || localtunelHostName.test(hostname);
 
     return isLocal;
   }

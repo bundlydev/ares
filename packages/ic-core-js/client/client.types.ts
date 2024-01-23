@@ -1,7 +1,8 @@
-import { IdentityProvider } from "../identity-providers";
 import { ActorConfig, Agent, HttpAgentOptions } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
 import { Principal } from "@dfinity/principal";
+
+import { IdentityProvider } from "../identity-providers";
 
 export type CreateActorOptions = {
   /**

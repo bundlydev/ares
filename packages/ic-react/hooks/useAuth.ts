@@ -1,7 +1,10 @@
-import { IcpConnectContext } from "../context";
-import { Identity } from "@dfinity/agent";
-import { AppLinkParams } from "@bundly/ic-core-js";
 import { useContext } from "react";
+
+import { AppLinkParams } from "@bundly/ic-core-js";
+
+import { Identity } from "@dfinity/agent";
+
+import { IcpConnectContext } from "../context";
 
 export type LoginOptions = {
   maxTimeToLive?: bigint;

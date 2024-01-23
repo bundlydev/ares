@@ -1,6 +1,8 @@
-import { IcpConnectContext, IcpConnectContextType } from "../context";
-import { ActorMap } from "@bundly/ic-core-js/client";
 import { useContext } from "react";
+
+import { ActorMap } from "@bundly/ic-core-js/client";
+
+import { IcpConnectContext, IcpConnectContextType } from "../context";
 
 export const useActor = <T extends Record<string, any>>(name: keyof T): ActorMap<T>[keyof T] => {
   const { client } = useContext(IcpConnectContext) as IcpConnectContextType<T>;

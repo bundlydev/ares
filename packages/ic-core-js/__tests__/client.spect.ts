@@ -1,5 +1,6 @@
-import { Client } from "../client";
 import { AnonymousIdentity } from "@dfinity/agent";
+
+import { Client } from "../client";
 
 describe("Client", () => {
   it("should instantiate correctly", async () => {

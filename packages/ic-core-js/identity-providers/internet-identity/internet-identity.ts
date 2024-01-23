@@ -1,9 +1,10 @@
-import { ConnectError } from "../../errors/connect.error";
-import { IdentityProvider } from "../identity-provider.interface";
-import { InternetIdentityConfig } from "./internet-identity.types";
 import { AnonymousIdentity, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
+
+import { ConnectError } from "../../errors/connect.error";
+import { IdentityProvider } from "../identity-provider.interface";
+import { InternetIdentityConfig } from "./internet-identity.types";
 
 const defaultConfig: InternetIdentityConfig = {
   providerUrl: "https://identity.ic0.app",

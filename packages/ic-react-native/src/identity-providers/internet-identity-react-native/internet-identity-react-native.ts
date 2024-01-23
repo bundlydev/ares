@@ -1,3 +1,9 @@
+import * as Device from "expo-device";
+import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
+
+import { AppLinkParams, IdentityProvider } from "@bundly/ic-core-js";
+
 import { AnonymousIdentity, Identity, SignIdentity, toHex } from "@dfinity/agent";
 import {
   DelegationChain,
@@ -7,11 +13,6 @@ import {
 } from "@dfinity/identity";
 import { Principal } from "@dfinity/principal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Device from "expo-device";
-import * as SecureStore from "expo-secure-store";
-import * as WebBrowser from "expo-web-browser";
-
-import { AppLinkParams, IdentityProvider } from "@bundly/ic-core-js";
 
 import { InternetIdentityReactNativeConfig } from "./internet-identity-react-native.types";
 
@@ -27,7 +28,7 @@ export class InternetIdentityReactNative implements IdentityProvider {
   private _key: SignIdentity | null = null;
   private _chain: DelegationChain | null = null;
 
-  constructor(private readonly config: InternetIdentityReactNativeConfig) { }
+  constructor(private readonly config: InternetIdentityReactNativeConfig) {}
 
   public async init(): Promise<void> {
     const localKey = await this.getKey();
