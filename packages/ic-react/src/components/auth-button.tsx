@@ -7,8 +7,8 @@ import { IdentityProvider } from "@bundly/ic-core-js";
 import { useCurrentProvider } from "../hooks/useCurrentProvider";
 
 export type AuthButtonProps = {
-  loginButtonStyle: CSSProperties | undefined;
-  logoutButtonStyle: CSSProperties | undefined;
+  loginButtonStyle?: CSSProperties | undefined;
+  logoutButtonStyle?: CSSProperties | undefined;
 };
 
 export function AuthButton(props: AuthButtonProps) {
