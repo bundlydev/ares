@@ -1,8 +1,6 @@
 import { Identity } from "@dfinity/agent";
 import { useContext } from "react";
 
-import { AppLinkParams } from "@bundly/ic-core-js";
-
 import { IcpConnectContext } from "../context";
 
 export type LoginOptions = {
@@ -14,19 +12,15 @@ export type LoginOptions = {
 export type Auth = {
   identity: Identity;
   isAuthenticated: boolean;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  onAppLinkOpened: (params: AppLinkParams) => Promise<void>;
 };
 
 export const useAuth = (): Auth => {
-  const { identity, isAuthenticated, connect, disconnect, onAppLinkOpened } = useContext(IcpConnectContext);
+  const { client } = useContext(IcpConnectContext);
+  const identity = client.getIdentity();
+  const isAuthenticated = !identity.getPrincipal().isAnonymous();
 
   return {
     identity,
     isAuthenticated,
-    connect,
-    disconnect,
-    onAppLinkOpened,
   };
 };

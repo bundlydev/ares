@@ -1,15 +1,13 @@
-import { AnonymousIdentity, Identity } from "@dfinity/agent";
+import { Identity } from "@dfinity/agent";
 import React, { ReactNode, createContext, useEffect, useState } from "react";
 
-import { AppLinkParams, Client } from "@bundly/ic-core-js";
+import { Client, IdentityProvider } from "@bundly/ic-core-js";
 
 export type IcpConnectContextType = {
   client: Client;
-  identity: Identity;
   isAuthenticated: boolean;
-  connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  onAppLinkOpened(params: AppLinkParams): Promise<void>;
+  onConnect: () => Promise<void>;
+  onDisconnect: () => Promise<void>;
 };
 
 export type IcpConnectContextProviderProps = {
@@ -17,88 +15,51 @@ export type IcpConnectContextProviderProps = {
   client: Client;
 };
 
-export const IcpConnectContext = createContext({} as any);
+export const IcpConnectContext = createContext<IcpConnectContextType>({} as any);
 
-export const IcpConnectContextProvider = ({ children, client }: IcpConnectContextProviderProps) => {
-  const [isReady, setIsReady] = useState<boolean>(false);
-
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [identity, setIdentity] = useState<Identity>(new AnonymousIdentity());
-
-  const currentProvider = client.getIdentityProviders()["internet-identity"];
+export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps) => {
+  const [initialized, setInitialized] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [client] = useState<Client>(props.client);
 
   useEffect(() => {
     async function bootstrap() {
-      await currentProvider.init();
-      const identity = currentProvider.getIdentity();
+      await client.init();
+      const currentProvider = client.getCurrentProvider();
 
-      await client.init(identity);
-
-      setIdentity(identity);
-
-      if (!identity.getPrincipal().isAnonymous()) {
-        setIsAuthenticated(true);
-      } else {
+      if (!currentProvider) {
         setIsAuthenticated(false);
+        setInitialized(true);
+        return;
       }
 
-      setIsReady(true);
+      const isAuthenticated = !client.getIdentity().getPrincipal().isAnonymous();
+
+      setIsAuthenticated(isAuthenticated);
+      setInitialized(true);
     }
 
     bootstrap();
   }, []);
 
-  async function connect() {
-    try {
-      await currentProvider.connect();
-
-      if (currentProvider.type === "web") {
-        const identity = currentProvider.getIdentity();
-        await client.replaceIdentity(identity);
-        setIdentity(identity);
-        setIsAuthenticated(true);
-      }
-    } catch (error) {
-      throw error;
-    }
+  async function onConnect() {
+    setIsAuthenticated(true);
   }
 
-  async function disconnect() {
-    await currentProvider.disconnect();
-    const identity = new AnonymousIdentity();
-    await client.replaceIdentity(identity);
-    setIdentity(identity);
+  async function onDisconnect() {
     setIsAuthenticated(false);
   }
 
-  async function onAppLinkOpened(params: AppLinkParams) {
-    if (currentProvider.type !== "native") {
-      console.warn("onAppLinkOpened only should called in native apps");
-    }
-
-    if (currentProvider.onAppLinkOpened) {
-      await currentProvider.onAppLinkOpened(params);
-
-      const identity = currentProvider.getIdentity();
-      await client.replaceIdentity(identity);
-      setIdentity(identity);
-      setIsAuthenticated(true);
-    }
-  }
-
   return (
-    isReady && (
+    initialized && (
       <IcpConnectContext.Provider
-        // TODO: useMemo is recommended here
         value={{
           client,
-          identity,
           isAuthenticated,
-          connect,
-          disconnect,
-          onAppLinkOpened,
+          onConnect,
+          onDisconnect,
         }}>
-        {children}
+        {props.children}
       </IcpConnectContext.Provider>
     )
   );

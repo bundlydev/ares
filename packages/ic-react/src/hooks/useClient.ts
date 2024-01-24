@@ -6,5 +6,6 @@ import { IcpConnectContext } from "../context";
 
 export const useClient = (): Client => {
   const { client } = useContext(IcpConnectContext);
+
   return client;
 };
