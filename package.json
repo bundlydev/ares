@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-connect",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Monorepo for ic-connectors",
   "author": "Bundly",
   "license": "MIT",
@@ -8,6 +8,14 @@
   "engines": {
     "node": ">=20"
   },
+  "keywords": [
+    "dfinity",
+    "ICP",
+    "Internet Computer",
+    "React",
+    "React native",
+    "Typescript"
+  ],
   "workspaces": [
     "packages/*"
   ],
