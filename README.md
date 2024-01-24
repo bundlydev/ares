@@ -42,9 +42,9 @@ import { ActorSubclass } from "@dfinity/agent";
 import { Canister } from "ic-core-js";
 
 // This ignore is required because there's an error with its d.ts file
+import { _SERVICE } from "@app/declarations/user/user.did";
 // @ts-ignore
-import { idlFactory } from ".../declarations/user/user.did.js";
-import { _SERVICE } from ".../declarations/user/user.did.js";
+import { idlFactory } from "@app/declarations/user/user.did.js";
 
 // Used to type useActor hook
 export type UserActor = ActorSubclass<_SERVICE>;
