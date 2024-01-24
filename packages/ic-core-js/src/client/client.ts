@@ -1,15 +1,25 @@
 import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, Identity } from "@dfinity/agent";
 
-import { ClientConfig, IdentityProviders } from "./client.types";
+import { IdentityProvider } from "../identity-providers";
+import { ClientConfig, ClientStorage, CreateClientConfig, IdentityProviders } from "./client.types";
+
+export const CURRENT_PROVIDER_KEY = "current-identity-provider";
 
 export class Client {
   private actors: Record<string, ActorMethod> = {};
   private identity = new AnonymousIdentity();
+  private currentProvider: IdentityProvider | undefined;
 
   private constructor(private readonly config: ClientConfig) { }
 
-  public async init(identity?: Identity): Promise<void> {
-    this.replaceIdentity(identity || this.identity);
+  public async init(): Promise<void> {
+    const currentProvider = await this.config.storage.getItem(CURRENT_PROVIDER_KEY);
+
+    if (currentProvider) {
+      await this.setCurrentProvider(currentProvider);
+    } else {
+      await this.setActors(this.identity);
+    }
   }
 
   private isLocal(host: string): boolean {
@@ -77,11 +87,60 @@ export class Client {
     return this.actors[name];
   }
 
-  public getIdentityProviders(): IdentityProviders {
-    return this.config.identityProviders;
+  public getProviders(): IdentityProviders {
+    return this.config.providers || [];
   }
 
-  public static create(config: ClientConfig) {
-    return new Client(config);
+  public getProvider(name: string): IdentityProvider | undefined {
+    return this.getProviders().find((provider) => provider.name === name);
+  }
+
+  public async setCurrentProvider(provider: string): Promise<void> {
+    const currentProvider = this.getProvider(provider);
+
+    if (currentProvider) {
+      try {
+        await currentProvider.init();
+        const identity = currentProvider.getIdentity();
+        await this.config.storage.setItem(CURRENT_PROVIDER_KEY, currentProvider.name);
+        this.replaceIdentity(identity);
+        this.currentProvider = currentProvider;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    }
+  }
+
+  public async removeCurrentProvider(): Promise<void> {
+    await this.config.storage.removeItem(CURRENT_PROVIDER_KEY);
+    this.replaceIdentity(new AnonymousIdentity());
+    this.currentProvider = undefined;
+  }
+
+  public getCurrentProvider(): IdentityProvider | undefined {
+    return this.currentProvider;
+  }
+
+  public static create(config: CreateClientConfig) {
+    const storage = new ReactStorage();
+
+    const clientConfig = { storage, ...config };
+
+    return new Client(clientConfig);
+  }
+}
+
+class ReactStorage implements ClientStorage {
+  public async getItem(key: string) {
+    return localStorage.getItem(key);
+  }
+
+  public async setItem(key: string, value: string) {
+    localStorage.setItem(key, value);
+  }
+
+  public async removeItem(key: string) {
+    localStorage.removeItem(key);
   }
 }

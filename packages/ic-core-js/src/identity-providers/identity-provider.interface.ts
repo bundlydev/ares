@@ -1,5 +1,4 @@
 import { Identity } from "@dfinity/agent";
-import { Principal } from "@dfinity/principal";
 
 export type AppLinkParams = {
   publicKey: string;
@@ -7,13 +6,13 @@ export type AppLinkParams = {
 };
 
 export interface IdentityProvider {
-  type: "web" | "native";
+  name: string;
+  displayName: string;
+  logo: string;
   init: () => Promise<void>;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
-  isAuthenticated: () => boolean;
   getIdentity: () => Identity;
-  getPrincipal: () => Principal;
-  // TODO: This is mandatory if type is "native"
+  // TODO: This is mandatory for native apps
   onAppLinkOpened?: (params: AppLinkParams) => Promise<void>;
 }

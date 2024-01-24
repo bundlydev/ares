@@ -9,10 +9,24 @@ export type Canister = {
   configuration: ActorConfig;
 };
 
+export interface ClientStorage {
+  getItem: (key: string) => Promise<string | null>;
+  setItem: (key: string, value: string) => Promise<void>;
+  removeItem: (key: string) => Promise<void>;
+}
+
+export type CreateClientConfig = {
+  agent: HttpAgentOptions;
+  canisters: Record<string, Canister>;
+  providers?: IdentityProviders;
+  storage?: ClientStorage;
+};
+
 export type ClientConfig = {
   agent: HttpAgentOptions;
   canisters: Record<string, Canister>;
-  identityProviders: IdentityProviders;
+  providers?: IdentityProviders;
+  storage: ClientStorage;
 };
 
-export type IdentityProviders = { [key: string]: IdentityProvider };
+export type IdentityProviders = IdentityProvider[];
