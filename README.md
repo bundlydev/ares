@@ -14,19 +14,19 @@ This repository contains JavaScript connectors designed to establish seamless co
 
 1. **ic-core-js**
 
-   Includes :
+Includes :
 
-   - Client class abstracts canister communication.
-   - Identity Provider Interface defines the methods that should have all identity providers.
-   - Internet Identity Provider is a class that implements authentication with Internet Identity implementing the methods declared in Identity Provider Interface.
+- Client class abstracts canister communication.
+- Identity Provider Interface defines the methods that should have all identity providers.
+- Internet Identity Provider is a class that implements authentication with Internet Identity implementing the methods declared in Identity Provider Interface.
 
 2. **ic-react**
 
-   Manages authentication flow with Internet Identity and enables react components to interact with frontend client.
+Wrapps `ic-core-js` for React applicacions and provides a context and hooks for ease of use.
 
 3. **ic-react-native**
 
-   Manages authentication flow of ic-react but for react-native using the Internet Identity middleware.
+Includes Internet Identity Middleware provider and AuthButton to enable the Internet Identity integration for React Native Apps.
 
 ## How to use
 
