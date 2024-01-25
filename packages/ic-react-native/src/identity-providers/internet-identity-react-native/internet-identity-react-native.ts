@@ -7,9 +7,8 @@ import {
 } from "@dfinity/identity";
 import { Principal } from "@dfinity/principal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Device from "expo-device";
+// TODO: replace expo-secure-store with another secure storage
 import * as SecureStore from "expo-secure-store";
-import * as WebBrowser from "expo-web-browser";
 
 import { AppLinkParams, IdentityProvider } from "@bundly/ic-core-js";
 
@@ -21,7 +20,9 @@ export const KEY_STORAGE_DELEGATION = "delegation";
 export type StoredKey = string | CryptoKeyPair;
 
 export class InternetIdentityReactNative implements IdentityProvider {
-  public readonly type = "native";
+  public readonly name = "internet-identity-middleware";
+  public readonly displayName = "Internet Identity";
+  public readonly logo = "";
   private _identity: Identity = new AnonymousIdentity();
   private _key: SignIdentity | null = null;
   private _chain: DelegationChain | null = null;
@@ -98,19 +99,14 @@ export class InternetIdentityReactNative implements IdentityProvider {
 
     this._identity = identity;
 
-    if (["iOS", "iPadOS"].includes(Device.osName || "")) {
-      WebBrowser.dismissBrowser();
-    }
+    this.config.inAppBrowser.close();
   }
 
   public async connect(): Promise<void> {
     if (!this._key) throw new Error("Key not set");
 
     try {
-      // If `connect` has been called previously, then close/remove any previous windows
-      if (["iOS", "iPadOS"].includes(Device.osName || "")) {
-        WebBrowser.dismissBrowser();
-      }
+      this.config.inAppBrowser.close();
 
       const derKey = toHex(this._key.getPublicKey().toDer());
 
@@ -119,7 +115,8 @@ export class InternetIdentityReactNative implements IdentityProvider {
       url.searchParams.set("redirect_uri", encodeURIComponent(this.config.appLink));
 
       url.searchParams.set("pubkey", derKey);
-      await WebBrowser.openBrowserAsync(url.toString(), { showTitle: false });
+
+      this.config.inAppBrowser.open(url.toString());
     } catch (error) {
       throw error;
     }
