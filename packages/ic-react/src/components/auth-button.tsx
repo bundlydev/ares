@@ -1,6 +1,5 @@
-import { IcpConnectContext } from "context";
-import { useClient, useProviders } from "hooks";
-import React, { CSSProperties, useContext } from "react";
+import { useAuth, useClient, useProviders } from "hooks";
+import React, { CSSProperties } from "react";
 
 import { IdentityProvider } from "@bundly/ic-core-js";
 
@@ -12,17 +11,16 @@ export type AuthButtonProps = {
 };
 
 export function AuthButton(props: AuthButtonProps) {
-  const { isAuthenticated, onConnect, onDisconnect } = useContext(IcpConnectContext);
+  const { isAuthenticated } = useAuth();
 
   return isAuthenticated ? (
-    <LogoutButton onDisconnect={onDisconnect} style={props.logoutButtonStyle} />
+    <LogoutButton style={props.logoutButtonStyle} />
   ) : (
-    <LoginButton onConnect={onConnect} style={props.loginButtonStyle} />
+    <LoginButton style={props.loginButtonStyle} />
   );
 }
 
 export type LoginButtonProps = {
-  onConnect: () => void;
   children?: React.ReactNode;
   style?: CSSProperties;
 };
@@ -38,10 +36,8 @@ function LoginButton(props: LoginButtonProps) {
       await client.setCurrentProvider(provider.name);
 
       await provider.connect();
-      props.onConnect();
     } catch (error) {
-      console.error(error);
-      throw error;
+      await client.removeCurrentProvider();
     }
   }
 
@@ -53,7 +49,6 @@ function LoginButton(props: LoginButtonProps) {
 }
 
 export type LogoutButtonProps = {
-  onDisconnect: () => void;
   children?: React.ReactNode;
   style?: CSSProperties;
 };
@@ -70,7 +65,6 @@ function LogoutButton(props: LogoutButtonProps) {
     try {
       await provider.disconnect();
       await client.removeCurrentProvider();
-      props.onDisconnect();
     } catch (error) {
       console.error(error);
       throw error;

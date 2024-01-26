@@ -9,8 +9,7 @@ export type Auth = {
 };
 
 export const useAuth = (): Auth => {
-  const { client, isAuthenticated } = useContext(IcpConnectContext);
-  const identity = client.getIdentity();
+  const { isAuthenticated, identity } = useContext(IcpConnectContext);
 
   return {
     identity,
