@@ -5,12 +5,11 @@ import {
   Ed25519KeyIdentity,
   isDelegationValid,
 } from "@dfinity/identity";
-import { Principal } from "@dfinity/principal";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // TODO: replace expo-secure-store with another secure storage
 import * as SecureStore from "expo-secure-store";
 
-import { AppLinkParams, IdentityProvider } from "@bundly/ic-core-js";
+import { AppLinkParams, IdentityProvider, InitOptions } from "@bundly/ic-core-js";
 
 import { InternetIdentityReactNativeConfig } from "./internet-identity-react-native.types";
 
@@ -26,10 +25,12 @@ export class InternetIdentityReactNative implements IdentityProvider {
   private _identity: Identity = new AnonymousIdentity();
   private _key: SignIdentity | null = null;
   private _chain: DelegationChain | null = null;
+  private options: InitOptions | undefined;
 
   constructor(private readonly config: InternetIdentityReactNativeConfig) { }
 
-  public async init(): Promise<void> {
+  public async init(options: InitOptions): Promise<void> {
+    this.options = options;
     const localKey = await this.getKey();
     const localChain = await this.getChain();
 
@@ -75,8 +76,6 @@ export class InternetIdentityReactNative implements IdentityProvider {
   }
 
   public async onAppLinkOpened(params: AppLinkParams): Promise<void> {
-    if (!this.getPrincipal().isAnonymous()) return;
-
     const { delegation, publicKey } = params;
 
     if (!delegation || !publicKey) {
@@ -93,13 +92,17 @@ export class InternetIdentityReactNative implements IdentityProvider {
 
     if (!isDelegationValid(chain)) throw new Error("delegation is not valid");
 
-    await this.saveChain(chain);
+    try {
+      await this.saveChain(chain);
 
-    const identity: DelegationIdentity = DelegationIdentity.fromDelegation(this._key, this._chain!);
+      const identity: DelegationIdentity = DelegationIdentity.fromDelegation(this._key, this._chain!);
 
-    this._identity = identity;
+      this._identity = identity;
 
-    this.config.inAppBrowser.close();
+      this.options?.connect.onSuccess({ identity });
+    } catch (error: any) {
+      this.options?.connect.onError({ message: error.message });
+    }
   }
 
   public async connect(): Promise<void> {
@@ -123,20 +126,17 @@ export class InternetIdentityReactNative implements IdentityProvider {
   }
 
   public async disconnect(): Promise<void> {
-    await this.deleteChain();
-    this._identity = new AnonymousIdentity();
-    this._chain = null;
-  }
-
-  public isAuthenticated(): boolean {
-    return !this.getPrincipal().isAnonymous();
+    try {
+      await this.deleteChain();
+      this._identity = new AnonymousIdentity();
+      this._chain = null;
+      this.options?.disconnect.onSuccess();
+    } catch (error: any) {
+      this.options?.disconnect.onError({ message: error.message });
+    }
   }
 
   public getIdentity(): Identity {
     return this._identity;
-  }
-
-  public getPrincipal(): Principal {
-    return this._identity.getPrincipal();
   }
 }
