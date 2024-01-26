@@ -1,6 +1,15 @@
 import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, Identity } from "@dfinity/agent";
+import { EventEmitter as EventManager } from "events";
 
+import {
+  AuthConnectErrorPayload,
+  AuthConnectSuccessPayload,
+  AuthDisconnectErrorPayload,
+  EventEmitter,
+  EventListener,
+} from "../events";
 import { IdentityProvider } from "../identity-providers";
+import * as url from "../utils/url";
 import { ClientConfig, ClientStorage, CreateClientConfig, IdentityProviders } from "./client.types";
 
 export const CURRENT_PROVIDER_KEY = "current-identity-provider";
@@ -9,8 +18,13 @@ export class Client {
   private actors: Record<string, ActorMethod> = {};
   private identity = new AnonymousIdentity();
   private currentProvider: IdentityProvider | undefined;
+  public eventEmitter: EventEmitter;
+  public eventListener: EventListener;
 
-  private constructor(private readonly config: ClientConfig) { }
+  private constructor(private readonly config: ClientConfig) {
+    this.eventEmitter = new EventEmitter(config.eventManager);
+    this.eventListener = new EventListener(config.eventManager);
+  }
 
   public async init(): Promise<void> {
     const currentProvider = await this.config.storage.getItem(CURRENT_PROVIDER_KEY);
@@ -20,19 +34,6 @@ export class Client {
     } else {
       await this.setActors(this.identity);
     }
-  }
-
-  private isLocal(host: string): boolean {
-    const { hostname } = new URL(host);
-    const localHostNames = ["127.0.0.1", "localhost"];
-    // TODO: wildcard for ngrok free and premium
-    const ngrokHostName = /^.*\.ngrok-free\.app$/;
-    const localtunelHostName = /^.*\.loca\.lt$/;
-
-    const isLocal =
-      localHostNames.includes(hostname) || ngrokHostName.test(hostname) || localtunelHostName.test(hostname);
-
-    return isLocal;
   }
 
   public async replaceIdentity(identity: Identity): Promise<void> {
@@ -52,7 +53,7 @@ export class Client {
 
     const defaultAgent = new HttpAgent({ ...agent, host: defaultHost, identity });
 
-    this.isLocal(defaultHost) && defaultAgent.fetchRootKey().then(() => console.log("Root key fetched"));
+    url.isLocal(defaultHost) && defaultAgent.fetchRootKey().then(() => console.log("Root key fetched"));
 
     const actors = Object.entries(canisters).reduce((reducer, current) => {
       const [name, canister] = current;
@@ -64,7 +65,7 @@ export class Client {
 
         localAgent = new HttpAgent({ ...canister.agent, host: localHost, identity });
 
-        this.isLocal(localHost) && localAgent.fetchRootKey().then(() => console.log("Root key fetched"));
+        url.isLocal(localHost) && localAgent.fetchRootKey().then(() => console.log("Root key fetched"));
       }
 
       const { idlFactory, configuration } = canister;
@@ -100,7 +101,18 @@ export class Client {
 
     if (currentProvider) {
       try {
-        await currentProvider.init();
+        const initOptions = {
+          connect: {
+            onSuccess: (payload: AuthConnectSuccessPayload) => this.eventEmitter.connectSuccess(payload),
+            onError: (payload: AuthConnectErrorPayload) => this.eventEmitter.connectError(payload),
+          },
+          disconnect: {
+            onSuccess: () => this.eventEmitter.disconnectSuccess(),
+            onError: (payload: AuthDisconnectErrorPayload) => this.eventEmitter.disconnectError(payload),
+          },
+        };
+
+        await currentProvider.init(initOptions);
         const identity = currentProvider.getIdentity();
         await this.config.storage.setItem(CURRENT_PROVIDER_KEY, currentProvider.name);
         this.replaceIdentity(identity);
@@ -109,6 +121,8 @@ export class Client {
         console.error(error);
         throw error;
       }
+    } else {
+      this.removeCurrentProvider();
     }
   }
 
@@ -123,9 +137,9 @@ export class Client {
   }
 
   public static create(config: CreateClientConfig) {
+    const eventManager = new EventManager();
     const storage = new ReactStorage();
-
-    const clientConfig = { storage, ...config };
+    const clientConfig = { storage, eventManager, ...config };
 
     return new Client(clientConfig);
   }
