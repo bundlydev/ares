@@ -1,28 +1,23 @@
-import { useAuth, useClient, useProviders } from "hooks";
-import React, { CSSProperties } from "react";
+import React from "react";
+import { Button } from "react-native";
 
 import { IdentityProvider } from "@bundly/ic-core-js";
-
-import { useCurrentProvider } from "../hooks/useCurrentProvider";
+import { useAuth, useClient, useCurrentProvider, useProviders } from "@bundly/ic-react";
 
 export type AuthButtonProps = {
-  loginButtonStyle?: CSSProperties | undefined;
-  logoutButtonStyle?: CSSProperties | undefined;
+  login?: {
+    text?: string;
+  };
 };
 
 export function AuthButton(props: AuthButtonProps) {
   const { isAuthenticated } = useAuth();
 
-  return isAuthenticated ? (
-    <LogoutButton style={props.logoutButtonStyle} />
-  ) : (
-    <LoginButton style={props.loginButtonStyle} />
-  );
+  return isAuthenticated ? <LogoutButton /> : <LoginButton />;
 }
 
 export type LoginButtonProps = {
-  children?: React.ReactNode;
-  style?: CSSProperties;
+  title?: string;
 };
 
 function LoginButton(props: LoginButtonProps) {
@@ -41,16 +36,11 @@ function LoginButton(props: LoginButtonProps) {
     }
   }
 
-  return (
-    <button onClick={() => login()} style={props.style || styles.button}>
-      {props.children || "Login"}
-    </button>
-  );
+  return <Button onPress={() => login()} title={props.title || "Login"} />;
 }
 
 export type LogoutButtonProps = {
-  children?: React.ReactNode;
-  style?: CSSProperties;
+  title?: string;
 };
 
 function LogoutButton(props: LogoutButtonProps) {
@@ -71,11 +61,7 @@ function LogoutButton(props: LogoutButtonProps) {
     }
   }
 
-  return (
-    <button onClick={() => logout()} style={props.style || styles.button}>
-      {props.children || "Logout"}
-    </button>
-  );
+  return <Button onPress={() => logout()} title={props.title || "Logout"} />;
 }
 
 function selectProvider(providers: IdentityProvider[]): IdentityProvider {
@@ -90,16 +76,3 @@ function selectProvider(providers: IdentityProvider[]): IdentityProvider {
   // TODO: Display view to select provider
   return providers[0];
 }
-
-const styles = {
-  button: {
-    "background-color": "white",
-    color: "black",
-    padding: "8px 16px",
-    border: "1px solid #ccc",
-    "border-radius": "4px",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease-in-out",
-    "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
-  },
-};

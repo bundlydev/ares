@@ -1,5 +1,6 @@
 import { ActorConfig, HttpAgentOptions } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
+import { EventEmitter as EventManager } from "events";
 
 import { IdentityProvider } from "../identity-providers";
 
@@ -27,6 +28,7 @@ export type ClientConfig = {
   canisters: Record<string, Canister>;
   providers?: IdentityProviders;
   storage: ClientStorage;
+  eventManager: EventManager;
 };
 
 export type IdentityProviders = IdentityProvider[];
