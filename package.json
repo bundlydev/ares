@@ -1,6 +1,6 @@
 {
-  "name": "@bundly/ic-connect",
-  "version": "1.2.0",
+  "name": "@bundly/ic-connect-js",
+  "version": "0.4.0",
   "description": "Monorepo for ic-connectors",
   "author": "Bundly",
   "license": "MIT",
