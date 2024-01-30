@@ -1,7 +1,7 @@
 {
   "name": "@bundly/ic-core-js",
   "version": "0.4.0",
-  "description": "[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/your-username/ic-core-js/blob/main/LICENSE)",
+  "description": "Client library for interacting with the Internet Computer",
   "author": "Bundly",
   "license": "MIT",
   "private": false,
