@@ -17,7 +17,7 @@ describe("Client", () => {
     expect(client instanceof Client).toBe(true);
 
     expect(client.getIdentity()).toBeDefined();
-    expect(client.getIdentityProviders()).toBeDefined();
+    expect(client.getProviders()).toBeDefined();
 
     expect(client.getIdentity().getPrincipal().isAnonymous()).toBe(true);
   });
@@ -39,12 +39,14 @@ describe("Client", () => {
 
     const client = Client.create(config);
 
-    const identityProvider = client.getIdentityProviders()["internet_identity"];
+    await client.init();
+
+    const identityProvider = client.getProviders()["internet_identity"];
     await identityProvider.init();
 
-    const identity = client.getIdentityProviders()["internet_identity"].getIdentity();
+    const identity = client.getProviders()["internet_identity"].getIdentity();
 
-    await client.init(identity);
+    await client.replaceIdentity(identity);
 
     expect(client.getIdentity().getPrincipal().toString()).toBe(
       identity.getPrincipal().toString()
