@@ -2,6 +2,8 @@
 
 Welcome to the `ic-connect-js` monorepo!
 
+**IMPORTANT**: this is a work in progress, we are currently in a Beta version
+
 ## Overview
 
 This repository contains JavaScript connectors designed to establish seamless communication between web and native applications (built with JavaScript) and ICP Backend Services (Canisters).
