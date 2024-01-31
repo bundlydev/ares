@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./src",
     "outDir": "./build",
     "target": "es6",
     "module": "commonjs",
@@ -10,6 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
   },
-  "include": ["client/**/*", "identity-providers/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "build"],
 }
