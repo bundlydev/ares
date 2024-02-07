@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-react-native",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Welcome to ic-react-native!",
   "author": "Bundly",
   "license": "MIT",
@@ -25,12 +25,12 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ic-core-js": "^0.4.0",
-    "@bundly/ic-react": "^0.4.0",
-    "@dfinity/agent": "^0.20.2",
-    "@dfinity/auth-client": "^0.20.2",
-    "@dfinity/identity": "^0.20.2",
-    "@dfinity/principal": "^0.20.2",
+    "@bundly/ic-core-js": "^0.4.1",
+    "@bundly/ic-react": "^0.4.1",
+    "@dfinity/agent": "^0.21.4",
+    "@dfinity/auth-client": "^0.21.4",
+    "@dfinity/identity": "^0.21.4",
+    "@dfinity/principal": "^0.21.4",
     "@react-native-async-storage/async-storage": "^1.21.0",
     "expo": "^50.0.2",
     "expo-modules-core": "^1.5.12",
