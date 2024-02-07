@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-react",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Welcome to ic-react!",
   "author": "Bundly",
   "license": "MIT",
@@ -25,11 +25,11 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ic-core-js": "^0.4.0",
-    "@dfinity/agent": "^0.20.2",
-    "@dfinity/auth-client": "^0.20.2",
-    "@dfinity/identity": "^0.20.2",
-    "@dfinity/principal": "^0.20.2",
+    "@bundly/ic-core-js": "^0.4.1",
+    "@dfinity/agent": "^0.21.4",
+    "@dfinity/auth-client": "^0.21.4",
+    "@dfinity/identity": "^0.21.4",
+    "@dfinity/principal": "^0.21.4",
     "react": "^18.2.0"
   },
   "devDependencies": {
