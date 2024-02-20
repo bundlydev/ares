@@ -1281,6 +1281,38 @@
   resolved "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@bundly/ic-core-js@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.npmjs.org/@bundly/ic-core-js/-/ic-core-js-0.4.1.tgz"
+  integrity sha512-bHyY8fBWJdSrl0Du2/Swzy26bI6FDWD1RKVPq6BpqCymT0rgigMfYtuUy9YWHq/h+yemqTl1WGUSf7I3EStdFg==
+  dependencies:
+    "@dfinity/agent" "^0.21.4"
+    "@dfinity/auth-client" "^0.21.4"
+    "@dfinity/candid" "^0.21.4"
+    "@dfinity/identity" "^0.21.4"
+    "@dfinity/principal" "^0.21.4"
+    events "^3.3.0"
+
+"@bundly/ic-http-client@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.npmjs.org/@bundly/ic-http-client/-/ic-http-client-0.1.1.tgz"
+  integrity sha512-stwgKFO8GoYV2Xa//5IO3h4Ub3b8cxtEqR/V+Vjy8PGUp1qc/DeLZFnPtFUPFPXfer5I4V8x1DAqLIIDa9v+sA==
+  dependencies:
+    "@dfinity/agent" "^1.0.0"
+    "@dfinity/principal" "^1.0.0"
+
+"@bundly/ic-react@^0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@bundly/ic-react/-/ic-react-0.4.1.tgz#10980430ef79b9c66f631f417237b6cc000bf907"
+  integrity sha512-GG3PBjIHLYWNycXd25UMWOjFe3dkgHIUGMZp0VKBNtt6MpTVvCkke3PtX3ZFUx3wVEM8PKrqMM7C9R5wKzVN/A==
+  dependencies:
+    "@bundly/ic-core-js" "^0.4.1"
+    "@dfinity/agent" "^0.21.4"
+    "@dfinity/auth-client" "^0.21.4"
+    "@dfinity/identity" "^0.21.4"
+    "@dfinity/principal" "^0.21.4"
+    react "^18.2.0"
+
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
   resolved "https://registry.npmjs.org/@cspotcode/source-map-support/-/source-map-support-0.8.1.tgz"
@@ -1292,6 +1324,18 @@
   version "0.21.4"
   resolved "https://registry.npmjs.org/@dfinity/agent/-/agent-0.21.4.tgz"
   integrity sha512-k5k8v1BmDE8RStC22FtuqbFzMLaQAQL3cE/wF45ZMKP4WmBBmCPss75RDgIVGiFwLGEKKKXE1muHQDy9g+m5yQ==
+  dependencies:
+    "@noble/curves" "^1.2.0"
+    "@noble/hashes" "^1.3.1"
+    base64-arraybuffer "^0.2.0"
+    borc "^2.1.1"
+    buffer "^6.0.3"
+    simple-cbor "^0.4.1"
+
+"@dfinity/agent@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@dfinity/agent/-/agent-1.0.0.tgz"
+  integrity sha512-PdU3uDEacgAZUJTAlwqGkXjFT74u+BSiD7G6fk0QR/iIc6ynsws7nEf7PbNYhZVaf0e3IYrltk4d1XkOHP3KCw==
   dependencies:
     "@noble/curves" "^1.2.0"
     "@noble/hashes" "^1.3.1"
@@ -1325,6 +1369,13 @@
   version "0.21.4"
   resolved "https://registry.npmjs.org/@dfinity/principal/-/principal-0.21.4.tgz"
   integrity sha512-r9d+9BYZdFMzrq1+zcdIg6q6tlWeZ9SKnakVdhQ21qUJ6iDe0yxDlah6k9QKEh6fVsg2yv95nID++nqEosvt1Q==
+  dependencies:
+    "@noble/hashes" "^1.3.1"
+
+"@dfinity/principal@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.npmjs.org/@dfinity/principal/-/principal-1.0.0.tgz"
+  integrity sha512-lLX/EcrFbmyY/C1kDZhDeN3ebyG4PmBo8OkWP1hwpnp0BxAhv+5BEuFmK+PhH1T7tf6dtzmXOc5abWnPkzFbHQ==
   dependencies:
     "@noble/hashes" "^1.3.1"
 

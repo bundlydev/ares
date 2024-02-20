@@ -1,6 +1,8 @@
 import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, Identity } from "@dfinity/agent";
 import { EventEmitter as EventManager } from "events";
 
+import { HttpClient } from "@bundly/ic-http-client";
+
 import {
   AuthConnectErrorPayload,
   AuthConnectSuccessPayload,
@@ -10,12 +12,13 @@ import {
 } from "../events";
 import { IdentityProvider } from "../identity-providers";
 import * as url from "../utils/url";
-import { ClientConfig, ClientStorage, CreateClientConfig, IdentityProviders } from "./client.types";
+import { Canister, ClientConfig, ClientStorage, CreateClientConfig, IdentityProviders } from "./client.types";
 
 export const CURRENT_PROVIDER_KEY = "current-identity-provider";
 
 export class Client {
   private actors: Record<string, ActorMethod> = {};
+  private restActors: Record<string, HttpClient> = {};
   private identity = new AnonymousIdentity();
   private currentProvider: IdentityProvider | undefined;
   public eventEmitter: EventEmitter;
@@ -33,6 +36,7 @@ export class Client {
       await this.setCurrentProvider(currentProvider);
     } else {
       await this.setActors(this.identity);
+      await this.setRestActors(this.identity);
     }
   }
 
@@ -40,14 +44,17 @@ export class Client {
     this.identity = identity;
 
     await this.setActors(this.identity);
+    await this.setRestActors(this.identity);
   }
 
   public getIdentity(): Identity {
     return this.identity;
   }
 
-  private async setActors(identity: Identity): Promise<void> {
-    const { agent, canisters } = this.config;
+  private actorsFactory(identity: Identity, canisters?: Record<string, Canister>): Record<string, ActorMethod> {
+    const { agent } = this.config;
+
+    if (!canisters) return {};
 
     const defaultHost = agent.host || "http://localhost:4943";
 
@@ -81,11 +88,36 @@ export class Client {
       };
     }, {});
 
-    this.actors = actors;
+    return actors;
+  }
+
+  private async setActors(identity: Identity): Promise<void> {
+    const { canisters } = this.config;
+    this.actors = this.actorsFactory(identity, canisters);
   }
 
   public getActor(name: string) {
     return this.actors[name];
+  }
+
+  public setRestActors(identity: Identity) {
+    const { restCanisters } = this.config;
+    const actors = this.actorsFactory(identity, restCanisters);
+
+    const restActors: Record<string, HttpClient> = Object.entries(actors).reduce((reducer, current) => {
+      const [name, actor] = current;
+
+      return {
+        ...reducer,
+        [name]: new HttpClient(actor as any),
+      };
+    }, {});
+
+    this.restActors = restActors;
+  }
+
+  public getRestActor(name: string): HttpClient {
+    return this.restActors[name];
   }
 
   public getProviders(): IdentityProviders {

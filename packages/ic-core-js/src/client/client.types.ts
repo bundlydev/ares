@@ -10,6 +10,13 @@ export type Canister = {
   configuration: ActorConfig;
 };
 
+// TODO: implement correct idlFactory type
+export type RestCanister = {
+  agent?: HttpAgentOptions;
+  idlFactory: IDL.InterfaceFactory;
+  configuration: ActorConfig;
+};
+
 export interface ClientStorage {
   getItem: (key: string) => Promise<string | null>;
   setItem: (key: string, value: string) => Promise<void>;
@@ -18,14 +25,16 @@ export interface ClientStorage {
 
 export type CreateClientConfig = {
   agent: HttpAgentOptions;
-  canisters: Record<string, Canister>;
+  canisters?: Record<string, Canister>;
+  restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
   storage?: ClientStorage;
 };
 
 export type ClientConfig = {
   agent: HttpAgentOptions;
-  canisters: Record<string, Canister>;
+  canisters?: Record<string, Canister>;
+  restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
   storage: ClientStorage;
   eventManager: EventManager;
