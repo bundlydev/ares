@@ -1,4 +1,4 @@
-import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, Identity } from "@dfinity/agent";
+import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { EventEmitter as EventManager } from "events";
 
 import { HttpClient } from "@bundly/ic-http-client";
@@ -17,14 +17,26 @@ import { Canister, ClientConfig, ClientStorage, CreateClientConfig, IdentityProv
 export const CURRENT_PROVIDER_KEY = "current-identity-provider";
 
 export class Client {
-  private actors: Record<string, ActorMethod> = {};
+  private candidActors: Record<string, ActorMethod> = {};
   private restActors: Record<string, HttpClient> = {};
   private identity = new AnonymousIdentity();
   private currentProvider: IdentityProvider | undefined;
+  private defaultAgent: HttpAgent;
+  private candidAgents: Record<string, HttpAgent>;
+  private restAgents: Record<string, HttpAgent>;
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
 
   private constructor(private readonly config: ClientConfig) {
+    const { canisters = {}, restCanisters = {}, agent } = this.config;
+
+    this.defaultAgent = this.generateAgent(agent, this.identity);
+    this.candidAgents = this.createAgents(canisters, this.identity);
+    this.restAgents = this.createAgents(restCanisters, this.identity);
+
+    this.setCandidActors();
+    this.setRestActors();
+
     this.eventEmitter = new EventEmitter(config.eventManager);
     this.eventListener = new EventListener(config.eventManager);
   }
@@ -34,51 +46,66 @@ export class Client {
 
     if (currentProvider) {
       await this.setCurrentProvider(currentProvider);
-    } else {
-      await this.setActors(this.identity);
-      await this.setRestActors(this.identity);
     }
+  }
+
+  private generateAgent(options: HttpAgentOptions, identity?: Identity) {
+    const host = options.host || "http://localhost:4943";
+    const agent = new HttpAgent({ ...options, host, identity });
+
+    url.isLocal(host) && agent.fetchRootKey().then(() => console.log("Root key fetched"));
+
+    return agent;
+  }
+
+  private createAgents(canisters: Record<string, Canister>, identity?: Identity) {
+    const hosts = Object.entries(canisters)
+      .filter(([key, data]) => data.agent)
+      .reduce((reducer: Record<string, HttpAgent>, [name, data]) => {
+        const agent = this.generateAgent(data.agent as HttpAgentOptions, identity);
+
+        return {
+          ...reducer,
+          [name]: agent,
+        };
+      }, {});
+
+    return hosts;
   }
 
   public async replaceIdentity(identity: Identity): Promise<void> {
     this.identity = identity;
 
-    await this.setActors(this.identity);
-    await this.setRestActors(this.identity);
+    // Replace identity in agents default agent
+    this.defaultAgent.replaceIdentity(identity);
+
+    // Replace identity in candid agents
+    Object.entries(this.candidAgents).forEach(([name, agent]) => {
+      agent.replaceIdentity(identity);
+    });
+
+    // Replace identity in rest agents
+    Object.entries(this.restAgents).forEach(([name, agent]) => {
+      agent.replaceIdentity(identity);
+    });
   }
 
   public getIdentity(): Identity {
     return this.identity;
   }
 
-  private actorsFactory(identity: Identity, canisters?: Record<string, Canister>): Record<string, ActorMethod> {
-    const { agent } = this.config;
-
+  private actorsFactory(agents: Record<string, HttpAgent>, canisters?: Record<string, Canister>): Record<string, ActorMethod> {
     if (!canisters) return {};
-
-    const defaultHost = agent.host || "http://localhost:4943";
-
-    const defaultAgent = new HttpAgent({ ...agent, host: defaultHost, identity });
-
-    url.isLocal(defaultHost) && defaultAgent.fetchRootKey().then(() => console.log("Root key fetched"));
 
     const actors = Object.entries(canisters).reduce((reducer, current) => {
       const [name, canister] = current;
 
-      let localAgent: HttpAgent | undefined;
-
-      if (canister.agent) {
-        const localHost = canister.agent.host || "http://localhost:4943";
-
-        localAgent = new HttpAgent({ ...canister.agent, host: localHost, identity });
-
-        url.isLocal(localHost) && localAgent.fetchRootKey().then(() => console.log("Root key fetched"));
-      }
-
       const { idlFactory, configuration } = canister;
 
+      const agent = agents[name] || this.defaultAgent;
+
       const actor = Actor.createActor(idlFactory, {
-        agent: localAgent || defaultAgent,
+        agent,
         ...configuration,
       });
 
@@ -91,18 +118,26 @@ export class Client {
     return actors;
   }
 
-  private async setActors(identity: Identity): Promise<void> {
-    const { canisters } = this.config;
-    this.actors = this.actorsFactory(identity, canisters);
+  private setCandidActors(): void {
+    const { candidCanisters, canisters } = this.config;
+    // TODO: remove canisters
+    this.candidActors = this.actorsFactory(this.candidAgents, candidCanisters || canisters);
   }
 
+  /**
+  * @deprecated The method should not be used, use getCandidActor instead
+  */
   public getActor(name: string) {
-    return this.actors[name];
+    return this.candidActors[name];
   }
 
-  public setRestActors(identity: Identity) {
+  public getCandidActor(name: string) {
+    return this.candidActors[name];
+  }
+
+  public setRestActors() {
     const { restCanisters } = this.config;
-    const actors = this.actorsFactory(identity, restCanisters);
+    const actors = this.actorsFactory(this.restAgents, restCanisters);
 
     const restActors: Record<string, HttpClient> = Object.entries(actors).reduce((reducer, current) => {
       const [name, actor] = current;

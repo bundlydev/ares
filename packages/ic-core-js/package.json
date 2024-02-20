@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-core-js",
-  "version": "0.4.2-rc.2",
+  "version": "0.4.2-rc.4",
   "description": "Client library for interacting with the Internet Computer",
   "author": "Bundly",
   "license": "MIT",

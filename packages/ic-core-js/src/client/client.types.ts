@@ -25,7 +25,9 @@ export interface ClientStorage {
 
 export type CreateClientConfig = {
   agent: HttpAgentOptions;
+  // @deprecated The method should not be used
   canisters?: Record<string, Canister>;
+  candidCanisters?: Record<string, Canister>;
   restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
   storage?: ClientStorage;
@@ -33,7 +35,9 @@ export type CreateClientConfig = {
 
 export type ClientConfig = {
   agent: HttpAgentOptions;
+  // @deprecated The method should not be used
   canisters?: Record<string, Canister>;
+  candidCanisters?: Record<string, Canister>;
   restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
   storage: ClientStorage;
