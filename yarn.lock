@@ -1293,17 +1293,17 @@
     "@dfinity/principal" "^0.21.4"
     events "^3.3.0"
 
-"@bundly/ic-http-client@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.npmjs.org/@bundly/ic-http-client/-/ic-http-client-0.1.1.tgz"
-  integrity sha512-stwgKFO8GoYV2Xa//5IO3h4Ub3b8cxtEqR/V+Vjy8PGUp1qc/DeLZFnPtFUPFPXfer5I4V8x1DAqLIIDa9v+sA==
+"@bundly/ic-http-client@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@bundly/ic-http-client/-/ic-http-client-0.1.2.tgz#c3a0dfdeb7f9955a0b6ea450ce880b3693ff9cde"
+  integrity sha512-EOevF/lb+dijIhhLRi8ScZp7QsCSLKUvOc2w4l0Fl2ou7zDeAxMBi6VuFNOMPyWZCY8bJu+aLgD6vBUzUqkNJg==
   dependencies:
     "@dfinity/agent" "^1.0.0"
     "@dfinity/principal" "^1.0.0"
 
 "@bundly/ic-react@^0.4.1":
   version "0.4.1"
-  resolved "https://registry.yarnpkg.com/@bundly/ic-react/-/ic-react-0.4.1.tgz#10980430ef79b9c66f631f417237b6cc000bf907"
+  resolved "https://registry.npmjs.org/@bundly/ic-react/-/ic-react-0.4.1.tgz"
   integrity sha512-GG3PBjIHLYWNycXd25UMWOjFe3dkgHIUGMZp0VKBNtt6MpTVvCkke3PtX3ZFUx3wVEM8PKrqMM7C9R5wKzVN/A==
   dependencies:
     "@bundly/ic-core-js" "^0.4.1"

@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ic-core-js",
-  "version": "0.4.2-rc.1",
+  "version": "0.4.2-rc.2",
   "description": "Client library for interacting with the Internet Computer",
   "author": "Bundly",
   "license": "MIT",
@@ -27,7 +27,7 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ic-http-client": "^0.1.1",
+    "@bundly/ic-http-client": "^0.1.2",
     "@dfinity/agent": "^0.21.4",
     "@dfinity/auth-client": "^0.21.4",
     "@dfinity/candid": "^0.21.4",
