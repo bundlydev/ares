@@ -48,8 +48,6 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
 
   function setListeners(client: Client) {
     client.eventListener.connectSuccess((payload) => {
-      const principal = payload.identity.getPrincipal();
-      console.log("principal", principal.toString());
       setIdentity(payload.identity);
       setIsAuthenticated(true);
     });
