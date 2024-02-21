@@ -21,17 +21,19 @@ export class Client {
   private restActors: Record<string, HttpClient> = {};
   private identity = new AnonymousIdentity();
   private currentProvider: IdentityProvider | undefined;
-  private defaultAgent: HttpAgent;
-  private candidAgents: Record<string, HttpAgent>;
+  private defaultAgent: HttpAgent | undefined;
+  private candidAgents: Record<string, HttpAgent> = {};
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
 
   private constructor(private readonly config: ClientConfig) {
     const { canisters = {}, agent } = this.config;
 
-    this.defaultAgent = this.initDefaultAgent(agent, this.identity);
-    this.candidAgents = this.initCandidAgents(canisters, this.identity);
+    if (agent) {
+      this.defaultAgent = this.createAgent(agent, this.identity);
+    }
 
+    this.initCandidAgents(canisters, this.identity);
     this.initCandidActors();
     this.initRestActors();
 
@@ -47,7 +49,7 @@ export class Client {
     }
   }
 
-  private initDefaultAgent(options: HttpAgentOptions, identity?: Identity) {
+  private createAgent(options: HttpAgentOptions, identity?: Identity): HttpAgent {
     const host = options.host || "http://localhost:4943";
     const agent = new HttpAgent({ ...options, host, identity });
 
@@ -56,11 +58,11 @@ export class Client {
     return agent;
   }
 
-  private initCandidAgents(canisters: Record<string, Canister>, identity?: Identity) {
-    const hosts = Object.entries(canisters)
+  private initCandidAgents(canisters: Record<string, Canister>, identity?: Identity): void {
+    const agents = Object.entries(canisters)
       .filter(([key, data]) => data.agent)
       .reduce((reducer: Record<string, HttpAgent>, [name, data]) => {
-        const agent = this.initDefaultAgent(data.agent as HttpAgentOptions, identity);
+        const agent = this.createAgent(data.agent as HttpAgentOptions, identity);
 
         return {
           ...reducer,
@@ -68,14 +70,16 @@ export class Client {
         };
       }, {});
 
-    return hosts;
+    this.candidAgents = agents;
   }
 
   public async replaceIdentity(identity: Identity): Promise<void> {
     this.identity = identity;
 
     // Replace identity in agents default agent
-    this.defaultAgent.replaceIdentity(identity);
+    if (this.defaultAgent) {
+      this.defaultAgent.replaceIdentity(identity);
+    }
 
     // Replace identity in candid agents
     Object.entries(this.candidAgents).forEach(([name, agent]) => {
@@ -101,6 +105,10 @@ export class Client {
       const { idlFactory, configuration } = canister;
 
       const agent = agents[name] || this.defaultAgent;
+
+      if (!agent) {
+        throw new Error("You must provide an agent for the canister or set a default agent.");
+      }
 
       const actor = Actor.createActor(idlFactory, {
         agent,

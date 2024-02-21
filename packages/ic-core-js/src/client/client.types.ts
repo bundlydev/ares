@@ -34,7 +34,7 @@ export type CreateClientConfig = {
 };
 
 export type ClientConfig = {
-  agent: HttpAgentOptions;
+  agent?: HttpAgentOptions;
   // @deprecated The method should not be used
   canisters?: Record<string, Canister>;
   candidCanisters?: Record<string, Canister>;
