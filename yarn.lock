@@ -1293,13 +1293,13 @@
     "@dfinity/principal" "^0.21.4"
     events "^3.3.0"
 
-"@bundly/ic-http-client@^0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@bundly/ic-http-client/-/ic-http-client-0.1.2.tgz#c3a0dfdeb7f9955a0b6ea450ce880b3693ff9cde"
-  integrity sha512-EOevF/lb+dijIhhLRi8ScZp7QsCSLKUvOc2w4l0Fl2ou7zDeAxMBi6VuFNOMPyWZCY8bJu+aLgD6vBUzUqkNJg==
+"@bundly/ic-http-client@^0.2.0-rc.0":
+  version "0.2.0-rc.0"
+  resolved "https://registry.yarnpkg.com/@bundly/ic-http-client/-/ic-http-client-0.2.0-rc.0.tgz#116680efe291a3f630e1e1affe5ba41b8c2cc198"
+  integrity sha512-V179SyOahfemL5iCKguOSH5RAK5ZSaOwsWSCg0rWAlZziYxcaBLRXc10z8OpWKNXfV5YVoe37mAshE200Nl3qw==
   dependencies:
-    "@dfinity/agent" "^1.0.0"
-    "@dfinity/principal" "^1.0.0"
+    "@dfinity/agent" "^1.0.1"
+    "@dfinity/principal" "^1.0.1"
 
 "@bundly/ic-react@^0.4.1":
   version "0.4.1"
@@ -1332,10 +1332,10 @@
     buffer "^6.0.3"
     simple-cbor "^0.4.1"
 
-"@dfinity/agent@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/@dfinity/agent/-/agent-1.0.0.tgz"
-  integrity sha512-PdU3uDEacgAZUJTAlwqGkXjFT74u+BSiD7G6fk0QR/iIc6ynsws7nEf7PbNYhZVaf0e3IYrltk4d1XkOHP3KCw==
+"@dfinity/agent@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@dfinity/agent/-/agent-1.0.1.tgz"
+  integrity sha512-QoCiKIWEgsXoaiHpb76M2qLXYDS9IdfvC81dLJYvX9KVXRq8Ojo4S82tBqBFGtM0j0EKEC6mIAJV/bqhOJTtjQ==
   dependencies:
     "@noble/curves" "^1.2.0"
     "@noble/hashes" "^1.3.1"
@@ -1351,15 +1351,36 @@
   dependencies:
     idb "^7.0.2"
 
+"@dfinity/auth-client@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@dfinity/auth-client/-/auth-client-1.0.1.tgz"
+  integrity sha512-QooHufXCDHTXySC1Tb1xf9+KRJISbw1sLYLIgY7PTxrA4Nc1ZgA7o4exwgRyIuJgoWMKrjgHPUZcu4N5ak69OQ==
+  dependencies:
+    idb "^7.0.2"
+
 "@dfinity/candid@^0.21.4":
   version "0.21.4"
-  resolved "https://registry.npmjs.org/@dfinity/candid/-/candid-0.21.4.tgz"
+  resolved "https://registry.yarnpkg.com/@dfinity/candid/-/candid-0.21.4.tgz#266aaff2996c7a4a3925361dec5060f8edfafe46"
   integrity sha512-BRdgLQjPbqEZDRIR985jpy92uwhdBn4mN2D8StMKyOXQLmR6hKSD0p/P2b632Sh7zPUY8HuiA8njpMZ67JEyAg==
+
+"@dfinity/candid@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@dfinity/candid/-/candid-1.0.1.tgz"
+  integrity sha512-PfZNV1fTOWtl+NhLOw71ACLYGugKF9HdEJKtkyBJqbj+6pqshvK6rllCUkGwMsmXfP8YopLzmoNVdy1rp/eOgg==
 
 "@dfinity/identity@^0.21.4":
   version "0.21.4"
   resolved "https://registry.npmjs.org/@dfinity/identity/-/identity-0.21.4.tgz"
   integrity sha512-+lTcr5+/RYwDSM7sGAKbt+kbpIWYDNpMmGi7D9iPWNJWYdWtTX6TDIJDx9dMCRN83/1lKLXF0p7F18ROZdjdUA==
+  dependencies:
+    "@noble/curves" "^1.2.0"
+    "@noble/hashes" "^1.3.1"
+    borc "^2.1.1"
+
+"@dfinity/identity@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@dfinity/identity/-/identity-1.0.1.tgz"
+  integrity sha512-ArajyKSkiA4LjOq/ocGLMd66svgMVntF9j9P7irZScrzTCPcEXk5c7VteAqRGMwHCpI4LRipjmuZA1agwmUzRw==
   dependencies:
     "@noble/curves" "^1.2.0"
     "@noble/hashes" "^1.3.1"
@@ -1372,10 +1393,10 @@
   dependencies:
     "@noble/hashes" "^1.3.1"
 
-"@dfinity/principal@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/@dfinity/principal/-/principal-1.0.0.tgz"
-  integrity sha512-lLX/EcrFbmyY/C1kDZhDeN3ebyG4PmBo8OkWP1hwpnp0BxAhv+5BEuFmK+PhH1T7tf6dtzmXOc5abWnPkzFbHQ==
+"@dfinity/principal@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.npmjs.org/@dfinity/principal/-/principal-1.0.1.tgz"
+  integrity sha512-pCAuTLcvZEZ8fYgVzTVhfUfFGadxeWN4v2z8Q0rizeiqcHKhbJVfWUiXXjzPGG5lNz2DxKyUHQ/WS4UTbTaxvg==
   dependencies:
     "@noble/hashes" "^1.3.1"
 

@@ -12,9 +12,9 @@ export type Canister = {
 
 // TODO: implement correct idlFactory type
 export type RestCanister = {
-  agent?: HttpAgentOptions;
-  idlFactory: IDL.InterfaceFactory;
-  configuration: ActorConfig;
+  baseUrl: string;
+  agentOptions?: Omit<HttpAgentOptions, "host" | "identity">;
+  actorOptions?: Omit<ActorConfig, "canisterId">;
 };
 
 export interface ClientStorage {

@@ -23,19 +23,17 @@ export class Client {
   private currentProvider: IdentityProvider | undefined;
   private defaultAgent: HttpAgent;
   private candidAgents: Record<string, HttpAgent>;
-  private restAgents: Record<string, HttpAgent>;
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
 
   private constructor(private readonly config: ClientConfig) {
-    const { canisters = {}, restCanisters = {}, agent } = this.config;
+    const { canisters = {}, agent } = this.config;
 
-    this.defaultAgent = this.generateAgent(agent, this.identity);
-    this.candidAgents = this.createAgents(canisters, this.identity);
-    this.restAgents = this.createAgents(restCanisters, this.identity);
+    this.defaultAgent = this.initDefaultAgent(agent, this.identity);
+    this.candidAgents = this.initCandidAgents(canisters, this.identity);
 
-    this.setCandidActors();
-    this.setRestActors();
+    this.initCandidActors();
+    this.initRestActors();
 
     this.eventEmitter = new EventEmitter(config.eventManager);
     this.eventListener = new EventListener(config.eventManager);
@@ -49,7 +47,7 @@ export class Client {
     }
   }
 
-  private generateAgent(options: HttpAgentOptions, identity?: Identity) {
+  private initDefaultAgent(options: HttpAgentOptions, identity?: Identity) {
     const host = options.host || "http://localhost:4943";
     const agent = new HttpAgent({ ...options, host, identity });
 
@@ -58,11 +56,11 @@ export class Client {
     return agent;
   }
 
-  private createAgents(canisters: Record<string, Canister>, identity?: Identity) {
+  private initCandidAgents(canisters: Record<string, Canister>, identity?: Identity) {
     const hosts = Object.entries(canisters)
       .filter(([key, data]) => data.agent)
       .reduce((reducer: Record<string, HttpAgent>, [name, data]) => {
-        const agent = this.generateAgent(data.agent as HttpAgentOptions, identity);
+        const agent = this.initDefaultAgent(data.agent as HttpAgentOptions, identity);
 
         return {
           ...reducer,
@@ -85,8 +83,8 @@ export class Client {
     });
 
     // Replace identity in rest agents
-    Object.entries(this.restAgents).forEach(([name, agent]) => {
-      agent.replaceIdentity(identity);
+    Object.entries(this.restActors).forEach(([name, actor]) => {
+      actor.replaceIdentity(identity);
     });
   }
 
@@ -118,7 +116,7 @@ export class Client {
     return actors;
   }
 
-  private setCandidActors(): void {
+  private initCandidActors(): void {
     const { candidCanisters, canisters } = this.config;
     // TODO: remove canisters
     this.candidActors = this.actorsFactory(this.candidAgents, candidCanisters || canisters);
@@ -135,16 +133,18 @@ export class Client {
     return this.candidActors[name];
   }
 
-  public setRestActors() {
-    const { restCanisters } = this.config;
-    const actors = this.actorsFactory(this.restAgents, restCanisters);
+  public initRestActors() {
+    const { restCanisters = {} } = this.config;
 
-    const restActors: Record<string, HttpClient> = Object.entries(actors).reduce((reducer, current) => {
-      const [name, actor] = current;
+    const restActors: Record<string, HttpClient> = Object.entries(restCanisters).reduce((reducer, current) => {
+      const [name, config] = current;
 
       return {
         ...reducer,
-        [name]: new HttpClient(actor as any),
+        [name]: new HttpClient(config.baseUrl, {
+          agentOptions: config.agentOptions,
+          actorOptions: config.actorOptions,
+        }),
       };
     }, {});
 

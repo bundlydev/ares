@@ -93,13 +93,13 @@ function selectProvider(providers: IdentityProvider[]): IdentityProvider {
 
 const styles = {
   button: {
-    "background-color": "white",
+    backgroundColor: "white",
     color: "black",
     padding: "8px 16px",
     border: "1px solid #ccc",
-    "border-radius": "4px",
+    borderRadius: "4px",
     cursor: "pointer",
     transition: "background-color 0.3s ease-in-out",
-    "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
+    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   },
 };
