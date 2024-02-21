@@ -25,7 +25,7 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ic-core-js": "^0.4.2-rc.5",
+    "@bundly/ic-core-js": "^0.4.2-rc.6",
     "@dfinity/agent": "^1.0.1",
     "@dfinity/auth-client": "^1.0.1",
     "@dfinity/identity": "^1.0.1",
