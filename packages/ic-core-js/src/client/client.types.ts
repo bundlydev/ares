@@ -10,6 +10,11 @@ export type Canister = {
   configuration: ActorConfig;
 };
 
+// TODO: implement correct idlFactory type
+export type RestCanister = {
+  baseUrl: string;
+};
+
 export interface ClientStorage {
   getItem: (key: string) => Promise<string | null>;
   setItem: (key: string, value: string) => Promise<void>;
@@ -17,15 +22,21 @@ export interface ClientStorage {
 }
 
 export type CreateClientConfig = {
-  agent: HttpAgentOptions;
-  canisters: Record<string, Canister>;
+  agent?: HttpAgentOptions;
+  // @deprecated The method should not be used
+  canisters?: Record<string, Canister>;
+  candidCanisters?: Record<string, Canister>;
+  restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
   storage?: ClientStorage;
 };
 
 export type ClientConfig = {
-  agent: HttpAgentOptions;
-  canisters: Record<string, Canister>;
+  agent?: HttpAgentOptions;
+  // @deprecated The method should not be used
+  canisters?: Record<string, Canister>;
+  candidCanisters?: Record<string, Canister>;
+  restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
   storage: ClientStorage;
   eventManager: EventManager;

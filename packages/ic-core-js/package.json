@@ -1,17 +1,17 @@
 {
   "name": "@bundly/ic-core-js",
-  "version": "0.4.1",
+  "version": "0.4.3-rc.1",
   "description": "Client library for interacting with the Internet Computer",
   "author": "Bundly",
   "license": "MIT",
   "private": false,
-  "homepage": "https://github.com/bundlydev/ic-core-js#readme",
+  "homepage": "https://github.com/bundlydev/ic-connect-js#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bundlydev/ic-core-js.git"
+    "url": "git+https://github.com/bundlydev/ic-connect-js.git"
   },
   "bugs": {
-    "url": "https://github.com/bundlydev/ic-core-js/issues"
+    "url": "https://github.com/bundlydev/ic-connect-js/issues"
   },
   "keywords": [],
   "main": "./build/index.js",
@@ -27,11 +27,12 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@dfinity/agent": "^0.21.4",
-    "@dfinity/auth-client": "^0.21.4",
-    "@dfinity/candid": "^0.21.4",
-    "@dfinity/identity": "^0.21.4",
-    "@dfinity/principal": "^0.21.4",
+    "@bundly/ares": "^0.1.1-rc.1",
+    "@dfinity/agent": "^1.0.1",
+    "@dfinity/auth-client": "^1.0.1",
+    "@dfinity/candid": "^1.0.1",
+    "@dfinity/identity": "^1.0.1",
+    "@dfinity/principal": "^1.0.1",
     "events": "^3.3.0"
   },
   "devDependencies": {
