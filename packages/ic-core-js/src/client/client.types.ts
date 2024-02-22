@@ -13,8 +13,6 @@ export type Canister = {
 // TODO: implement correct idlFactory type
 export type RestCanister = {
   baseUrl: string;
-  agentOptions?: Omit<HttpAgentOptions, "host" | "identity">;
-  actorOptions?: Omit<ActorConfig, "canisterId">;
 };
 
 export interface ClientStorage {

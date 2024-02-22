@@ -1,10 +1,10 @@
 import { useContext } from "react";
 
-import { HttpClient } from "@bundly/ic-http-client";
+import { AresInstance } from "@bundly/ares";
 
 import { IcpConnectContext } from "../context";
 
-export const useRestActor = (name: string): HttpClient => {
+export const useRestActor = (name: string): AresInstance => {
     const { client } = useContext(IcpConnectContext);
 
     const actor = client.getRestActor(name);

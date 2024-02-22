@@ -1,7 +1,7 @@
 import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { EventEmitter as EventManager } from "events";
 
-import { HttpClient } from "@bundly/ic-http-client";
+import ares, { AresInstance } from "@bundly/ares";
 
 import {
   AuthConnectErrorPayload,
@@ -18,7 +18,7 @@ export const CURRENT_PROVIDER_KEY = "current-identity-provider";
 
 export class Client {
   private candidActors: Record<string, ActorMethod> = {};
-  private restActors: Record<string, HttpClient> = {};
+  private restActors: Record<string, AresInstance> = {};
   private identity = new AnonymousIdentity();
   private currentProvider: IdentityProvider | undefined;
   private defaultAgent: HttpAgent | undefined;
@@ -33,8 +33,11 @@ export class Client {
       this.defaultAgent = this.createAgent(agent, this.identity);
     }
 
+    // Candid Actors
     this.initCandidAgents(canisters, this.identity);
     this.initCandidActors();
+
+    // Rest Actors
     this.initRestActors();
 
     this.eventEmitter = new EventEmitter(config.eventManager);
@@ -76,7 +79,7 @@ export class Client {
   public async replaceIdentity(identity: Identity): Promise<void> {
     this.identity = identity;
 
-    // Replace identity in agents default agent
+    // Replace identity in default agent
     if (this.defaultAgent) {
       this.defaultAgent.replaceIdentity(identity);
     }
@@ -86,7 +89,7 @@ export class Client {
       agent.replaceIdentity(identity);
     });
 
-    // Replace identity in rest agents
+    // Replace identity in rest actors
     Object.entries(this.restActors).forEach(([name, actor]) => {
       actor.replaceIdentity(identity);
     });
@@ -142,24 +145,25 @@ export class Client {
   }
 
   public initRestActors() {
-    const { restCanisters = {} } = this.config;
+    const { restCanisters } = this.config;
 
-    const restActors: Record<string, HttpClient> = Object.entries(restCanisters).reduce((reducer, current) => {
+    if (!restCanisters) return;
+
+    const restActors: Record<string, AresInstance> = Object.entries(restCanisters).reduce((reducer, current) => {
       const [name, config] = current;
 
       return {
         ...reducer,
-        [name]: new HttpClient(config.baseUrl, {
-          agentOptions: config.agentOptions,
-          actorOptions: config.actorOptions,
-        }),
+        [name]: ares.create({
+          baseURL: config.baseUrl,
+        })
       };
     }, {});
 
     this.restActors = restActors;
   }
 
-  public getRestActor(name: string): HttpClient {
+  public getRestActor(name: string): AresInstance {
     return this.restActors[name];
   }
 
