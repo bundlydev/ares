@@ -5,13 +5,13 @@
   "author": "Bundly",
   "license": "MIT",
   "private": false,
-  "homepage": "https://github.com/bundlydev/ic-react#readme",
+  "homepage": "https://github.com/bundlydev/ic-connect-js#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bundlydev/ic-react.git"
+    "url": "git+https://github.com/bundlydev/ic-connect-js.git"
   },
   "bugs": {
-    "url": "https://github.com/bundlydev/ic-react/issues"
+    "url": "https://github.com/bundlydev/ic-connect-js/issues"
   },
   "keywords": [],
   "main": "./build/index.js",
