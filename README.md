@@ -1,152 +1,66 @@
-# ic-connect-js
+<p align="center">
+  <img src="/public/logo.svg" style="width: 400px; margin: 0 auto;" >
+</p>
 
-Welcome to the `ic-connect-js` monorepo!
+Javascript libraries to help your frontend and native JS applications communicate to Internet Computer Protocol canisters and Internet Identity.
 
-**IMPORTANT**: this is a work in progress, we are currently in a Beta version
+## Badges
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+
+| Library         | Version                                                              |
+| --------------- | -------------------------------------------------------------------- |
+| ic-core-js      | ![npm version](https://img.shields.io/npm/v/@bundly/ic-core-js)      |
+| ic-react        | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react)        |
+| ic-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react-native) |
+| ic-http-client  | ![npm version](https://img.shields.io/npm/v/@bundly/ic-http-client)  |
+| ares            | ![npm version](https://img.shields.io/npm/v/@bundly/ares)            |
 
 ## Overview
 
-This repository contains JavaScript connectors designed to establish seamless communication between web and native applications (built with JavaScript) and ICP Backend Services (Canisters).
+This repository contains JavaScript modules that work as connectors designed to establish seamless communication between Javascript Web and Native applications and ICP Backend Services (Canisters).
 
-**Currently, this is a Beta version, but we anticipate releasing our first stable version very soon. Please do not hesitate to send us your comments, questions or suggestions.**
+Contributors are welcome. While we don't have a formal process for proposals, you are encouraged to open an issue at any time before making a pull request.
 
-**Contributors are welcome. While we don't have a formal process for proposals, you are encouraged to open an issue at any time before making a pull request.**
-
-## Packages content
+## Library Packages Content
 
 1. **ic-core-js**
 
 Includes :
 
-- Client class abstracts canister communication.
+- Client class that abstracts canister communication.
 - Identity Provider Interface defines the methods that should have all identity providers.
 - Internet Identity Provider is a class that implements authentication with Internet Identity implementing the methods declared in Identity Provider Interface.
 
 2. **ic-react**
 
-Wrapps `ic-core-js` for React applicacions and provides a context and hooks for ease of use.
+Wrapps `ic-core-js` for React applications and provides a context and hooks for ease of use.
 
 3. **ic-react-native**
 
 Includes Internet Identity Middleware provider and AuthButton to enable the Internet Identity integration for React Native Apps.
 
+4. **ic-http-client**
+   TBD
+
+5. **ares**
+   TBD
+
 ## How to use
 
-### Canister declarations
+Please visit the dedicated **READ.ME** file for each package.
 
-In order to use whenever app you are build, you have to create some files to create objects and types needed to work with Canisters
+ic-core-js [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ic-core-js/README.md)
 
-First of all you have to create a file per Canister, the file should look like this:
+ic-react [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ic-react/README.md)
 
-```javascript
-import { ActorSubclass } from "@dfinity/agent";
+ic-react-native [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ic-react-native/README.md)
 
-import { Canister } from "ic-core-js";
-
-// This ignore is required because there's an error with its d.ts file
-import { _SERVICE } from "@app/declarations/user/user.did";
-// @ts-ignore
-import { idlFactory } from "@app/declarations/user/user.did.js";
-
-// Used to type useActor hook
-export type UserActor = ActorSubclass<_SERVICE>;
-
-// Used to build Actor
-export const user: Canister = {
-  idlFactory,
-  configuration: {
-    canisterId: process.env.USER_CANISTER_ID,
-  },
-};
-```
-
-After you have created all the necessary Canister files, you need to create an index.js file. This file will merge all the canisters into a single object. After creating the `index.js` file, proceed as follows:
-
-```javascript
-import { UserActor, user } from "./user";
-
-export type Actors = {
-  user: UserActor;
-};
-
-export const canisters = {
-  user,
-};
-```
-
-### React App
-
-For React applications, you need to implement our `IcpConnectContextProvider` component in the `App.tsx` file as follows:
-
-```javascript
-// App.tsx
-...
-import { Client, InternetIdentity } from "@bundly/ic-core-js";
-import { IcpConnectContextProvider } from "@bundly/ic-react";
-
-import { canisters } from "../canisters";
-
-export default function MyApp({ Component, pageProps }: AppProps) {
-  const client = Client.create({
-    agent: {
-      host: process.env.NEXT_PUBLIC_IC_HOST!,
-    },
-    canisters,
-    providers: [
-      new InternetIdentity({
-        providerUrl: process.env.INTERNET_IDENTITY_URL
-      }),
-    ],
-  });
-
-  return (
-    <IcpConnectContextProvider client={client}>
-        <Component {...pageProps} />
-    </IcpConnectContextProvider>
-  );
-}
-```
-
-The `providers` attribute in the client object is optional, and currently, we only support a single provider.
-
-To initiate an authentication flow, utilize the `AuthButton`. This button leverages the provided providers to commence a login process.
-
-```javascript
-import { AuthButton } from "@bundly/ic-react";
-
-export default function LoginPage() {
-  return (
-    <div>
-      <p>Please login to continue</p>
-      <AuthButton />
-    </div>
-  );
-}
-```
-
-To establish a connection with a specific Canister, you can utilize the `useActor` hook:
-
-```javascript
-import { useActor } from "@bundly/ic-react";
-
-import { Actors } from "../canisters";
-
-const user = useActor<Actors>("user") as Actors["user"];
-
-...
-const result = await user.someCanisterMethod()
-...
-```
-
-We are currently enhancing the way TypeScript infers the correct actor type. In the meantime, you can enforce the type using `as Actors["user"]` as a workaround.
-
-### React Native App
-
-Work in Progress: We are in the process of developing a React Native provider to facilitate Internet Identity authentication on mobile devices.
+ares [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ares/README.md)
 
 ## Glossary
 
-- **[Internet Computer](https://internetcomputer.org/docs/current/tutorials/hackathon-prep-course/what-is-icp)**: A blockchain-based, decentralized, and permissionless identity system. Internet Identity allows you to authenticate securely and anonymously while you interact with Internet Computer and its dapps.
+- **[Internet Computer](https://internetcomputer.org/docs/current/tutorials/hackathon-prep-course/what-is-icp)**: A blockchain-based, decentralized, and permissionless identity system. Internet Identity allows you to authenticate securely and anonymously while you interact with Internet Computer and its dApps.
 
 - **[Canister](https://internetcomputer.org/docs/current/tutorials/hackathon-prep-course/what-is-icp#canister-smart-contracts)**: In the context of the Internet Computer, a canister is a computational unit that can hold both smart contract code and state. Each canister has a unique identifier and can communicate with other canisters through inter-canister calls.
 
