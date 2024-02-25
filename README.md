@@ -8,13 +8,11 @@ Javascript libraries to help your frontend and native JS applications communicat
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
-| Library         | Version                                                              |
-| --------------- | -------------------------------------------------------------------- |
-| ic-core-js      | ![npm version](https://img.shields.io/npm/v/@bundly/ic-core-js)      |
-| ic-react        | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react)        |
-| ic-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react-native) |
-| ic-http-client  | ![npm version](https://img.shields.io/npm/v/@bundly/ic-http-client)  |
-| ares            | ![npm version](https://img.shields.io/npm/v/@bundly/ares)            |
+| Library    | Version                                                         | Library         | Version                                                              |
+| ---------- | --------------------------------------------------------------- | --------------- | -------------------------------------------------------------------- |
+| ic-core-js | ![npm version](https://img.shields.io/npm/v/@bundly/ic-core-js) | ic-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react-native) |
+| ic-react   | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react)   | ic-http-client  | ![npm version](https://img.shields.io/npm/v/@bundly/ic-http-client)  |
+| ares       | ![npm version](https://img.shields.io/npm/v/@bundly/ares)       |
 
 ## Overview
 
