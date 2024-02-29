@@ -1,7 +1,7 @@
 {
-  "name": "@bundly/ic-connect-js",
-  "version": "0.4.2",
-  "description": "Monorepo for ic-connectors",
+  "name": "@bundly/ares",
+  "version": "0.1.0-rc.0",
+  "description": "Javascript libraries to help your web and mobile JS/TS applications communicate to Internet Computer Protocol canisters and Internet Identity.",
   "author": "Bundly",
   "license": "MIT",
   "private": true,

@@ -1,6 +1,6 @@
 # ic-core-js
 
-A JavaScript library for interacting with the Internet Computer (IC) core.
+A JavaScript library for interacting with the Internet Computer (IC).
 
 ## How to use
 
