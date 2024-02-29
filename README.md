@@ -8,11 +8,12 @@ Javascript libraries to help your web and mobile JS/TS applications communicate 
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
-| Library    | Version                                                         | Library         | Version                                                              |
-| ---------- | --------------------------------------------------------------- | --------------- | -------------------------------------------------------------------- |
-| ic-core-js | ![npm version](https://img.shields.io/npm/v/@bundly/ic-core-js) | ic-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react-native) |
-| ic-react   | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react)   | ic-http-client  | ![npm version](https://img.shields.io/npm/v/@bundly/ic-http-client)  |
-| ares       | ![npm version](https://img.shields.io/npm/v/@bundly/ares)       |
+| Library           | Version                                                                |
+| ----------------- | ---------------------------------------------------------------------- |
+| ares-core         | ![npm version](https://img.shields.io/npm/v/@bundly/ares-core)         |
+| ares-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ares-react-native) |
+| ares-react        | ![npm version](https://img.shields.io/npm/v/@bundly/ares-react)        |
+| ares-rest         | ![npm version](https://img.shields.io/npm/v/@bundly/ares-rest)         |
 
 ## Overview
 
