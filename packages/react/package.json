@@ -1,0 +1,42 @@
+{
+  "name": "@bundly/ares-react",
+  "version": "0.1.0-rc.0",
+  "description": "ares-core wrapper for React applications and provides components for ease of use.",
+  "author": "Bundly",
+  "license": "MIT",
+  "private": false,
+  "homepage": "https://github.com/bundlydev/ares/tree/main/packages/ares-react#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bundlydev/ares.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bundlydev/ares/issues"
+  },
+  "keywords": [],
+  "main": "./build/index.js",
+  "module": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
+  },
+  "dependencies": {
+    "@bundly/ares-rest": "^0.1.0-rc.2",
+    "@bundly/ares-core": "^0.1.0-rc.0",
+    "@dfinity/agent": "^1.0.1",
+    "@dfinity/auth-client": "^1.0.1",
+    "@dfinity/identity": "^1.0.1",
+    "@dfinity/principal": "^1.0.1",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.48",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3"
+  }
+}
