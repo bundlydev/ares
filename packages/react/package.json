@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ares-react",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.0-rc.1",
   "description": "ares-core wrapper for React applications and provides components for ease of use.",
   "author": "Bundly",
   "license": "MIT",
