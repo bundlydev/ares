@@ -1,0 +1,53 @@
+{
+  "name": "Ares",
+  "description": "Ares is a simple authentication library for your ICP javascript applications using Internet Identity.",
+  "domain": "https://github.com/bundlydev/ares",
+  "twitter": "@bundlydev",
+  "sidebar": [
+    {
+      "title": "Start here",
+      "pages": [
+        ["Getting-started", "/getting-started"],
+        ["User Canister", "/user-canister"],
+        ["Internet Identity Middleware", "/internet-identity-middleware"]
+      ]
+    },
+    {
+      "title": "Tutorials",
+      "pages": [
+        ["React", "/tutorials/react"],
+        ["React Native", "/tutorials/react-native"]
+      ]
+    },
+    {
+      "title": "Basics",
+      "pages": [
+        ["Canister", "/basics/canisters"],
+        ["Rest", "/basics/rest"],
+        ["React/Expo", "/basics/react-expo"]
+      ]
+    },
+    {
+      "title": "Guides",
+      "pages": [
+        ["Integrate in my react project", "/guides/integrate-react"],
+        ["Create my users canister", "/guides/create-user-canister"],
+        ["Integrate in my ReactNative/Expo project", "/guides/integrate-react-native-expo"],
+        ["Troubleshooting", "/guides/troubleshooting"],
+        ["Validating session on my Server API", "/guides/session-api"]
+      ]
+    },
+    {
+      "title": "API reference",
+      "pages": [["ares", "/reference/main", "code"]]
+    },
+    {
+      "title": "Community",
+      "pages": [
+        ["Discord", "https://discord.com/TBD"],
+        ["GitHub", "https://github.com/bundlydev/ares"],
+        ["Twitter", "https://twitter.com/bundlydev"]
+      ]
+    }
+  ]
+}
