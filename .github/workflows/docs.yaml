@@ -17,6 +17,7 @@ jobs:
       - name: setup actions
         uses: actions/checkout@v3
       - name: install malta
+        working-directory: docs
         run: |
           curl -o malta.tgz -L https://github.com/pilcrowonpaper/malta/releases/latest/download/linux-amd64.tgz
           tar -xvzf malta.tgz
@@ -26,7 +27,7 @@ jobs:
       - name: upload pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
-          path: dist
+          path: docs/dist
 
   deploy:
     needs: build
