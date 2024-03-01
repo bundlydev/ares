@@ -28,6 +28,9 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           path: docs/dist
+      - name: Replace URL in index.html
+        run: |
+          sed -i 's|https://bundlydev.github.io/|https://bundlydev.github.io/ares/|g' docs/dist/index.html
 
   deploy:
     needs: build
