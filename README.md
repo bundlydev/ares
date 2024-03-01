@@ -1,8 +1,8 @@
 <p align="center">
   <img src="/public/logo-ares.svg" style="width: 400px; margin: 0 auto;" >
   <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="/logo-ares-w.svg">
-  <source media="(prefers-color-scheme: light)" srcset="/logo-ares.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="/logo-ares.svg">
+  <source media="(prefers-color-scheme: light)" srcset="/logo-ares-w.svg">
 </picture>
 </p>
 
