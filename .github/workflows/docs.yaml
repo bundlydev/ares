@@ -24,14 +24,14 @@ jobs:
       - name: build
         working-directory: docs
         run: ./linux-amd64/malta build
+      - name: Replace URL in index.html
+        working-directory: docs/dist
+        run: |
+          find . -type f -name "*.html" -exec sed -i 's|href="|href="/ares/|g' {} +
       - name: upload pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: docs/dist
-      - name: Replace URL in index.html
-        working-directory: docs/dist
-        run: |
-          sed -i 's|/markdown.css|/ares/markdown.css|g; s|/main.css|/ares/main.css|g' index.html
 
   deploy:
     needs: build
