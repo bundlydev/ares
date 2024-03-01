@@ -27,7 +27,7 @@ jobs:
       - name: Replace URL in index.html
         working-directory: docs/dist
         run: |
-          find . -type f -name "*.html" -exec sed -i 's|href=[^"\']*|href="/ares/&"|g' {} +
+          find . -type f -name "*.html" -exec sed -i 's|href="/|href="/ares/|g' {} +
       - name: upload pages artifact
         uses: actions/upload-pages-artifact@v1
         with:
