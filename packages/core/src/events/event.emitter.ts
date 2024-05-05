@@ -13,7 +13,7 @@ import {
 } from "./event.types";
 
 export class EventEmitter {
-  constructor(private readonly eventManager: EventManager) { }
+  constructor(private readonly eventManager: EventManager) {}
 
   public connectSuccess(payload: AuthConnectSuccessPayload): void {
     this.eventManager.emit(AUTH_CONNECT_SUCCESS, payload);

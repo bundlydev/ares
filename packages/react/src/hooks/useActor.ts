@@ -3,8 +3,8 @@ import { useContext } from "react";
 import { IcpConnectContext } from "../context";
 
 /**
-  * @deprecated The method should not be used, use useCandidActor instead
-*/
+ * @deprecated The method should not be used, use useCandidActor instead
+ */
 export const useActor = <T, K extends keyof T = keyof T>(name: K): T[K] => {
   const { client } = useContext(IcpConnectContext);
 

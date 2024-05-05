@@ -1,7 +1,7 @@
 import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { EventEmitter as EventManager } from "events";
 
-import ar, { RestClientInstance } from "../../../rest-client/build";
+import restClient, { RestClientInstance } from "@bundly/ares-rest";
 
 import {
   AuthConnectErrorPayload,
@@ -99,7 +99,10 @@ export class Client {
     return this.identity;
   }
 
-  private actorsFactory(agents: Record<string, HttpAgent>, canisters?: Record<string, Canister>): Record<string, ActorMethod> {
+  private actorsFactory(
+    agents: Record<string, HttpAgent>,
+    canisters?: Record<string, Canister>
+  ): Record<string, ActorMethod> {
     if (!canisters) return {};
 
     const actors = Object.entries(canisters).reduce((reducer, current) => {
@@ -134,8 +137,8 @@ export class Client {
   }
 
   /**
-  * @deprecated The method should not be used, use getCandidActor instead
-  */
+   * @deprecated The method should not be used, use getCandidActor instead
+   */
   public getActor(name: string) {
     return this.candidActors[name];
   }
@@ -149,16 +152,19 @@ export class Client {
 
     if (!restCanisters) return;
 
-    const restActors: Record<string, RestClientInstance> = Object.entries(restCanisters).reduce((reducer, current) => {
-      const [name, config] = current;
+    const restActors: Record<string, RestClientInstance> = Object.entries(restCanisters).reduce(
+      (reducer, current) => {
+        const [name, config] = current;
 
-      return {
-        ...reducer,
-        [name]: ar.create({
-          baseURL: config.baseUrl,
-        })
-      };
-    }, {});
+        return {
+          ...reducer,
+          [name]: restClient.create({
+            baseURL: config.baseUrl,
+          }),
+        };
+      },
+      {}
+    );
 
     this.restActors = restActors;
   }

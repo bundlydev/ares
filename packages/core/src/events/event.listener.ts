@@ -21,7 +21,7 @@ export type ListenAuthDisconnectSuccessCallback = () => void;
 export type ListenAuthDisconnectErrorCallback = (payload: AuthDisconnectErrorPayload) => void;
 
 export class EventListener {
-  constructor(private readonly eventManager: EventManager) { }
+  constructor(private readonly eventManager: EventManager) {}
 
   public connectSuccess(callback: ListenAuthConnectSuccessCallback): void {
     this.eventManager.on(AUTH_CONNECT_SUCCESS, callback);

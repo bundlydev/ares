@@ -56,3 +56,7 @@ const response = await instance.post<TestResponse>(
   }
 );
 ```
+
+## Know Issues
+
+- multipart/form-data is not supported

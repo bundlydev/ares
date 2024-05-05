@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ares",
-  "version": "0.1.0-rc.0",
+  "version": "0.1.1-beta.0",
   "description": "Javascript libraries to help your web and mobile JS/TS applications communicate to Internet Computer Protocol canisters and Internet Identity.",
   "author": "Bundly",
   "license": "MIT",
