@@ -27,7 +27,7 @@ export class InternetIdentityReactNative implements IdentityProvider {
   private _chain: DelegationChain | null = null;
   private options: InitOptions | undefined;
 
-  constructor(private readonly config: InternetIdentityReactNativeConfig) { }
+  constructor(private readonly config: InternetIdentityReactNativeConfig) {}
 
   public async init(options: InitOptions): Promise<void> {
     this.options = options;
