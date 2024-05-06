@@ -23,7 +23,7 @@
   "scripts": {
     "build": "tsup",
     "prepublish": "npm run build",
-    "publish": "sh scripts/publish.sh",
+    "publish": "sh ../../scripts/publish.sh",
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
