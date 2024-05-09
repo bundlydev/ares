@@ -1,44 +1,38 @@
-import { ActorConfig, HttpAgentOptions } from "@dfinity/agent";
+import { ActorConfig, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
 import { EventEmitter as EventManager } from "events";
 
 import { IdentityProvider } from "../identity-providers";
+import { StorageInterface } from "../storage/storage.interface";
 
-export type Canister = {
-  agent?: HttpAgentOptions;
+export type IdentityMap = Map<string, { identity: Identity; provider: string }>;
+
+export type CandidCanister = {
+  agentConfig?: HttpAgentOptions;
   idlFactory: IDL.InterfaceFactory;
-  configuration: ActorConfig;
+  actorConfig: ActorConfig;
 };
 
 // TODO: implement correct idlFactory type
 export type RestCanister = {
   baseUrl: string;
+  agentConfig?: HttpAgentOptions;
 };
 
-export interface ClientStorage {
-  getItem: (key: string) => Promise<string | null>;
-  setItem: (key: string, value: string) => Promise<void>;
-  removeItem: (key: string) => Promise<void>;
-}
-
 export type CreateClientConfig = {
-  agent?: HttpAgentOptions;
-  // @deprecated The method should not be used
-  canisters?: Record<string, Canister>;
-  candidCanisters?: Record<string, Canister>;
-  restCanisters?: Record<string, RestCanister>;
+  agentConfig?: HttpAgentOptions;
+  candidCanisters?: Map<string, CandidCanister>;
+  restCanisters?: Map<string, RestCanister>;
   providers?: IdentityProviders;
-  storage?: ClientStorage;
+  storage?: StorageInterface;
 };
 
 export type ClientConfig = {
-  agent?: HttpAgentOptions;
-  // @deprecated The method should not be used
-  canisters?: Record<string, Canister>;
-  candidCanisters?: Record<string, Canister>;
-  restCanisters?: Record<string, RestCanister>;
+  agentConfig?: HttpAgentOptions;
+  candidCanisters?: Map<string, CandidCanister>;
+  restCanisters?: Map<string, RestCanister>;
   providers?: IdentityProviders;
-  storage: ClientStorage;
+  storage: StorageInterface;
   eventManager: EventManager;
 };
 

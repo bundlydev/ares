@@ -1,4 +1,11 @@
-import { Actor, ActorMethod, AnonymousIdentity, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
+import {
+  Actor,
+  ActorSubclass,
+  AnonymousIdentity,
+  HttpAgent,
+  HttpAgentOptions,
+  Identity,
+} from "@dfinity/agent";
 import { EventEmitter as EventManager } from "events";
 
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
@@ -11,34 +18,40 @@ import {
   EventListener,
 } from "../events";
 import { IdentityProvider } from "../identity-providers";
+import { LocalStorage } from "../storage/local-storage";
 import * as url from "../utils/url";
-import { Canister, ClientConfig, ClientStorage, CreateClientConfig, IdentityProviders } from "./client.types";
+import { CanisterDoesNotExistError } from "./client.errors";
+import {
+  CandidCanister,
+  ClientConfig,
+  CreateClientConfig,
+  IdentityMap,
+  IdentityProviders,
+} from "./client.types";
 
-export const CURRENT_PROVIDER_KEY = "current-identity-provider";
+export const CURRENT_PROVIDER_KEY = "CURRENT_PROVIDER_KEY";
 
 export class Client {
-  private candidActors: Record<string, ActorMethod> = {};
   private restActors: Record<string, RestClientInstance> = {};
   private identity = new AnonymousIdentity();
+  // TODO: use this for multiple identities
+  private identities: IdentityMap = new Map();
   private currentProvider: IdentityProvider | undefined;
   private defaultAgent: HttpAgent | undefined;
-  private candidAgents: Record<string, HttpAgent> = {};
+  private candidAgents: Map<string, HttpAgent> = new Map();
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
 
   private constructor(private readonly config: ClientConfig) {
-    const { canisters = {}, agent } = this.config;
+    const { candidCanisters, agentConfig } = this.config;
 
-    if (agent) {
-      this.defaultAgent = this.createAgent(agent, this.identity);
+    if (agentConfig) {
+      this.defaultAgent = this.createAgent(this.identity, agentConfig);
     }
 
-    // Candid Actors
-    this.initCandidAgents(canisters, this.identity);
-    this.initCandidActors();
-
-    // Rest Actors
-    this.initRestActors();
+    if (candidCanisters) {
+      this.initCandidAgents(candidCanisters, this.identity);
+    }
 
     this.eventEmitter = new EventEmitter(config.eventManager);
     this.eventListener = new EventListener(config.eventManager);
@@ -52,28 +65,25 @@ export class Client {
     }
   }
 
-  private createAgent(options: HttpAgentOptions, identity?: Identity): HttpAgent {
+  private initCandidAgents(canisters: Map<string, CandidCanister>, identity: Identity): void {
+    if (canisters.size === 0) return;
+
+    for (const [name, canister] of canisters.entries()) {
+      if (!canister.agentConfig) continue;
+
+      const agent = this.createAgent(identity, canister.agentConfig as HttpAgentOptions);
+
+      this.candidAgents.set(name, agent);
+    }
+  }
+
+  private createAgent(identity: Identity, options: HttpAgentOptions = {}): HttpAgent {
     const host = options.host || "http://localhost:4943";
-    const agent = new HttpAgent({ ...options, host, identity });
+    const agent = new HttpAgent({ host, identity, ...options });
 
     url.isLocal(host) && agent.fetchRootKey().then(() => console.log("Root key fetched"));
 
     return agent;
-  }
-
-  private initCandidAgents(canisters: Record<string, Canister>, identity?: Identity): void {
-    const agents = Object.entries(canisters)
-      .filter(([key, data]) => data.agent)
-      .reduce((reducer: Record<string, HttpAgent>, [name, data]) => {
-        const agent = this.createAgent(data.agent as HttpAgentOptions, identity);
-
-        return {
-          ...reducer,
-          [name]: agent,
-        };
-      }, {});
-
-    this.candidAgents = agents;
   }
 
   public async replaceIdentity(identity: Identity): Promise<void> {
@@ -99,78 +109,41 @@ export class Client {
     return this.identity;
   }
 
-  private actorsFactory(
-    agents: Record<string, HttpAgent>,
-    canisters?: Record<string, Canister>
-  ): Record<string, ActorMethod> {
-    if (!canisters) return {};
+  public getCandidActor(name: string): ActorSubclass {
+    const canister = this.config.candidCanisters?.get(name);
 
-    const actors = Object.entries(canisters).reduce((reducer, current) => {
-      const [name, canister] = current;
+    if (!canister) {
+      throw new CanisterDoesNotExistError(name);
+    }
 
-      const { idlFactory, configuration } = canister;
+    const agent = this.candidAgents.get(name) || this.defaultAgent;
 
-      const agent = agents[name] || this.defaultAgent;
+    if (!agent) {
+      throw new Error("You must provide an agent for the canister or set a default agent.");
+    }
 
-      if (!agent) {
-        throw new Error("You must provide an agent for the canister or set a default agent.");
-      }
+    const actor = Actor.createActor(canister.idlFactory, {
+      agent,
+      ...canister.actorConfig,
+    });
 
-      const actor = Actor.createActor(idlFactory, {
-        agent,
-        ...configuration,
-      });
-
-      return {
-        ...reducer,
-        [name]: actor,
-      };
-    }, {});
-
-    return actors;
-  }
-
-  private initCandidActors(): void {
-    const { candidCanisters, canisters } = this.config;
-    // TODO: remove canisters
-    this.candidActors = this.actorsFactory(this.candidAgents, candidCanisters || canisters);
-  }
-
-  /**
-   * @deprecated The method should not be used, use getCandidActor instead
-   */
-  public getActor(name: string) {
-    return this.candidActors[name];
-  }
-
-  public getCandidActor(name: string) {
-    return this.candidActors[name];
-  }
-
-  public initRestActors() {
-    const { restCanisters } = this.config;
-
-    if (!restCanisters) return;
-
-    const restActors: Record<string, RestClientInstance> = Object.entries(restCanisters).reduce(
-      (reducer, current) => {
-        const [name, config] = current;
-
-        return {
-          ...reducer,
-          [name]: restClient.create({
-            baseURL: config.baseUrl,
-          }),
-        };
-      },
-      {}
-    );
-
-    this.restActors = restActors;
+    return actor;
   }
 
   public getRestActor(name: string): RestClientInstance {
-    return this.restActors[name];
+    const canister = this.config.restCanisters?.get(name);
+
+    if (!canister) {
+      throw new CanisterDoesNotExistError(name);
+    }
+
+    // TODO: Modify restClient to accept an agent
+    const actor = restClient.create({
+      baseURL: canister?.baseUrl,
+      identity: this.identity,
+    });
+
+    return actor;
   }
 
   public getProviders(): IdentityProviders {
@@ -181,6 +154,7 @@ export class Client {
     return this.getProviders().find((provider) => provider.name === name);
   }
 
+  // TODO: Provider management should be outside of the client
   public async setCurrentProvider(provider: string): Promise<void> {
     const currentProvider = this.getProvider(provider);
 
@@ -221,25 +195,11 @@ export class Client {
     return this.currentProvider;
   }
 
-  public static create(config: CreateClientConfig) {
+  public static create(config: CreateClientConfig): Client {
     const eventManager = new EventManager();
-    const storage = new ReactStorage();
+    const storage = new LocalStorage();
     const clientConfig = { storage, eventManager, ...config };
 
     return new Client(clientConfig);
-  }
-}
-
-class ReactStorage implements ClientStorage {
-  public async getItem(key: string) {
-    return localStorage.getItem(key);
-  }
-
-  public async setItem(key: string, value: string) {
-    localStorage.setItem(key, value);
-  }
-
-  public async removeItem(key: string) {
-    localStorage.removeItem(key);
   }
 }
