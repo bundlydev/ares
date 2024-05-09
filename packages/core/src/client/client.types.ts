@@ -1,11 +1,19 @@
 import { ActorConfig, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
+import { DelegationIdentity } from "@dfinity/identity";
 import { EventEmitter as EventManager } from "events";
 
 import { IdentityProvider } from "../identity-providers";
 import { StorageInterface } from "../storage/storage.interface";
 
-export type IdentityMap = Map<string, { identity: Identity; provider: string }>;
+export type StoredIdentity = {
+  delegation: DelegationIdentity;
+  // TODO: we need to store the identity as well?
+  // identity: CryptoKeyPair;
+  provider: string;
+};
+
+export type IdentityMap = Map<string, StoredIdentity>;
 
 export type CandidCanister = {
   agentConfig?: HttpAgentOptions;
@@ -37,3 +45,8 @@ export type ClientConfig = {
 };
 
 export type IdentityProviders = IdentityProvider[];
+
+export type GetCandidActorOptions = {
+  canisterId?: string;
+  identity?: Identity;
+};

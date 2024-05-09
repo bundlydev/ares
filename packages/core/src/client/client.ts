@@ -6,6 +6,7 @@ import {
   HttpAgentOptions,
   Identity,
 } from "@dfinity/agent";
+import { Principal } from "@dfinity/principal";
 import { EventEmitter as EventManager } from "events";
 
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
@@ -22,37 +23,25 @@ import { LocalStorage } from "../storage/local-storage";
 import * as url from "../utils/url";
 import { CanisterDoesNotExistError } from "./client.errors";
 import {
-  CandidCanister,
   ClientConfig,
   CreateClientConfig,
+  GetCandidActorOptions,
   IdentityMap,
   IdentityProviders,
+  StoredIdentity,
 } from "./client.types";
 
 export const CURRENT_PROVIDER_KEY = "CURRENT_PROVIDER_KEY";
 
 export class Client {
-  private restActors: Record<string, RestClientInstance> = {};
   private identity = new AnonymousIdentity();
   // TODO: use this for multiple identities
   private identities: IdentityMap = new Map();
   private currentProvider: IdentityProvider | undefined;
-  private defaultAgent: HttpAgent | undefined;
-  private candidAgents: Map<string, HttpAgent> = new Map();
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
 
   private constructor(private readonly config: ClientConfig) {
-    const { candidCanisters, agentConfig } = this.config;
-
-    if (agentConfig) {
-      this.defaultAgent = this.createAgent(this.identity, agentConfig);
-    }
-
-    if (candidCanisters) {
-      this.initCandidAgents(candidCanisters, this.identity);
-    }
-
     this.eventEmitter = new EventEmitter(config.eventManager);
     this.eventListener = new EventListener(config.eventManager);
   }
@@ -65,66 +54,73 @@ export class Client {
     }
   }
 
-  private initCandidAgents(canisters: Map<string, CandidCanister>, identity: Identity): void {
-    if (canisters.size === 0) return;
+  private createAgent(options: HttpAgentOptions): HttpAgent {
+    const agent = new HttpAgent(options);
 
-    for (const [name, canister] of canisters.entries()) {
-      if (!canister.agentConfig) continue;
-
-      const agent = this.createAgent(identity, canister.agentConfig as HttpAgentOptions);
-
-      this.candidAgents.set(name, agent);
-    }
-  }
-
-  private createAgent(identity: Identity, options: HttpAgentOptions = {}): HttpAgent {
-    const host = options.host || "http://localhost:4943";
-    const agent = new HttpAgent({ host, identity, ...options });
-
-    url.isLocal(host) && agent.fetchRootKey().then(() => console.log("Root key fetched"));
+    // Host is defined in createAgentOptions
+    url.isLocal(options.host!) && agent.fetchRootKey().then(() => console.log("Root key fetched"));
 
     return agent;
   }
 
   public async replaceIdentity(identity: Identity): Promise<void> {
     this.identity = identity;
+  }
 
-    // Replace identity in default agent
-    if (this.defaultAgent) {
-      this.defaultAgent.replaceIdentity(identity);
-    }
+  public getIdentities(): IdentityMap {
+    return this.identities;
+  }
 
-    // Replace identity in candid agents
-    Object.entries(this.candidAgents).forEach(([name, agent]) => {
-      agent.replaceIdentity(identity);
-    });
+  public setIdentity(principal: Principal, identity: StoredIdentity): void {
+    console.log("Setting identity", principal.toString(), identity);
+    this.identities.set(principal.toString(), identity);
+  }
 
-    // Replace identity in rest actors
-    Object.entries(this.restActors).forEach(([name, actor]) => {
-      actor.replaceIdentity(identity);
-    });
+  public removeIdentity(principal: Principal): void {
+    this.identities.delete(principal.toString());
   }
 
   public getIdentity(): Identity {
     return this.identity;
   }
 
-  public getCandidActor(name: string): ActorSubclass {
+  private createAgentOptions(agentConfig?: HttpAgentOptions) {
+    const baseOptions = agentConfig || this.config.agentConfig;
+
+    if (!baseOptions) {
+      throw new Error("You must provide an agent for the canister or set a default agent.");
+    }
+
+    const options = {
+      ...baseOptions,
+      host: baseOptions.host || "http://localhost:4943",
+      identity: this.identity,
+    };
+
+    return options;
+  }
+
+  // TODO: Options should be optional?
+  public getCandidActor(name: string, options: GetCandidActorOptions): ActorSubclass {
     const canister = this.config.candidCanisters?.get(name);
 
     if (!canister) {
       throw new CanisterDoesNotExistError(name);
     }
 
-    const agent = this.candidAgents.get(name) || this.defaultAgent;
+    const agentOptions = this.createAgentOptions(canister.agentConfig);
+    const agent = this.createAgent({
+      ...agentOptions,
+      // TODO: remove agentOptions.identity
+      identity: options.identity || agentOptions.identity,
+    });
 
-    if (!agent) {
-      throw new Error("You must provide an agent for the canister or set a default agent.");
-    }
+    url.isLocal(agentOptions.host) && agent.fetchRootKey().then(() => console.log("Root key fetched"));
 
     const actor = Actor.createActor(canister.idlFactory, {
-      agent,
       ...canister.actorConfig,
+      canisterId: options.canisterId || canister.actorConfig.canisterId,
+      agent,
     });
 
     return actor;
