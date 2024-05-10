@@ -1,6 +1,6 @@
-import { ActorConfig, HttpAgentOptions, Identity, PublicKey } from "@dfinity/agent";
+import { ActorConfig, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
-import { DelegationIdentity, ECDSAKeyIdentity } from "@dfinity/identity";
+import { DelegationIdentity } from "@dfinity/identity";
 import { EventEmitter as EventManager } from "events";
 
 import { IdentityProvider } from "../identity-providers";
@@ -24,13 +24,13 @@ export type GetIdentitiesResult = {
   provider: string;
 }[];
 
-export type IdentitObject = {
+export type IdentityObject = {
   identity: DelegationIdentity;
   provider: string;
 };
 
 // string is a Principal in string format
-export type IdentityMap = Map<string, IdentitObject>;
+export type IdentityMap = Map<string, IdentityObject>;
 
 export type CandidCanister = {
   agentConfig?: HttpAgentOptions;

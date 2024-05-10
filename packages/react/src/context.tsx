@@ -4,9 +4,11 @@ import React, { ReactNode, createContext, useEffect, useState } from "react";
 import { Client } from "@bundly/ares-core";
 
 export type IcpConnectContextType = {
+  // TODO: Test if this can be removed
   client: Client;
-  identity: Identity;
+  currentIdentity: Identity;
   isAuthenticated: boolean;
+  identities: Identities;
 };
 
 export type IcpConnectContextProviderProps = {
@@ -16,10 +18,17 @@ export type IcpConnectContextProviderProps = {
 
 export const IcpConnectContext = createContext<IcpConnectContextType>({} as any);
 
+type Identities = {
+  identity: Identity;
+  provider: string;
+}[];
+
 export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps) => {
   const [initialized, setInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [identity, setIdentity] = useState<Identity>(new AnonymousIdentity());
+  const [identities, setIdentities] = useState<Identities>([]);
+  // Persist the current identity
+  const [currentIdentity, setCurrentIdentity] = useState<Identity>(new AnonymousIdentity());
   const [client] = useState<Client>(props.client);
 
   useEffect(() => {
@@ -30,39 +39,35 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
     await client.init();
     setListeners(client);
 
-    const currentProvider = client.getCurrentProvider();
-
-    if (!currentProvider) {
-      setAnonymousIdentity();
-      setInitialized(true);
-      return;
-    }
-
-    // TODO: get this from state or take the first one or set it to anonymous
-    const identity = client.getIdentities()[0]?.identity || new AnonymousIdentity();
+    const identities = client.getIdentities();
+    setIdentities(identities);
+    const identity = identities[0]?.identity || new AnonymousIdentity();
     const isAuthenticated = !identity.getPrincipal().isAnonymous();
 
-    setIdentity(identity);
+    setCurrentIdentity(identity);
     setIsAuthenticated(isAuthenticated);
     setInitialized(true);
   }
 
   function setListeners(client: Client) {
-    // TODO: Maybe these listeners should be moved to the client
-    client.eventListener.connectSuccess((payload) => {
-      setIdentity(payload.identity);
+    client.eventListener.onIdentityAdded((payload) => {
+      setIdentities(client.getIdentities());
+      setCurrentIdentity(payload.identity);
       setIsAuthenticated(true);
     });
 
-    client.eventListener.disconnectSuccess(() => {
-      setAnonymousIdentity();
-    });
-  }
+    client.eventListener.onIdentityRemoved((payload) => {
+      const identities = client
+        .getIdentities()
+        .filter((i) => i.identity.getPrincipal().toString() !== payload.identity.getPrincipal().toString());
+      setIdentities(identities);
 
-  function setAnonymousIdentity() {
-    const anonymousIdentity = new AnonymousIdentity();
-    setIdentity(anonymousIdentity);
-    setIsAuthenticated(false);
+      const identity = identities[0]?.identity || new AnonymousIdentity();
+      const isAuthenticated = !identity.getPrincipal().isAnonymous();
+
+      setCurrentIdentity(identity);
+      setIsAuthenticated(isAuthenticated);
+    });
   }
 
   return (
@@ -70,7 +75,8 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
       <IcpConnectContext.Provider
         value={{
           client,
-          identity,
+          identities,
+          currentIdentity,
           isAuthenticated,
         }}>
         {props.children}

@@ -1,36 +1,12 @@
 import { Identity } from "@dfinity/agent";
 
-import {
-  AuthConnectErrorPayload,
-  AuthConnectSuccessPayload,
-  AuthDisconnectErrorPayload,
-  AuthDisconnectSuccessPayload,
-} from "../events";
-
-export type AppLinkParams = {
-  publicKey: string;
-  delegation: string;
-};
-
-export type InitOptions = {
-  connect: {
-    onSuccess: (payload: AuthConnectSuccessPayload) => void;
-    onError: (error: AuthConnectErrorPayload) => void;
-  };
-  disconnect: {
-    onSuccess: (payload: AuthDisconnectSuccessPayload) => void;
-    onError: (error: AuthDisconnectErrorPayload) => void;
-  };
-};
+import { Client } from "../client";
 
 export interface IdentityProvider {
-  name: string;
   displayName: string;
   logo: string;
-  init: (options: InitOptions) => Promise<void>;
+  name: string;
   connect: () => Promise<void>;
-  disconnect: () => Promise<void>;
-  getIdentity: () => Identity;
-  // TODO: This is mandatory for native apps
-  onAppLinkOpened?: (params: AppLinkParams) => Promise<void>;
+  disconnect: (identity: Identity) => Promise<void>;
+  init: (client: Client) => Promise<void>;
 }

@@ -1,21 +1,14 @@
 import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity, fromHex, toHex } from "@dfinity/agent";
 import { DelegationChain, DelegationIdentity, Ed25519KeyIdentity } from "@dfinity/identity";
-import { Principal } from "@dfinity/principal";
 import { EventEmitter as EventManager } from "events";
 
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
 
-import {
-  AuthConnectErrorPayload,
-  AuthConnectSuccessPayload,
-  AuthDisconnectErrorPayload,
-  EventEmitter,
-  EventListener,
-} from "../events";
+import { EventEmitter, EventListener } from "../events";
 import { IdentityProvider } from "../identity-providers";
 import { LocalStorage } from "../storage/local-storage";
 import * as url from "../utils/url";
-import { CanisterDoesNotExistError } from "./client.errors";
+import { CanisterDoesNotExistError, ProviderNotFoundError } from "./client.errors";
 import {
   ClientConfig,
   CreateClientConfig,
@@ -26,40 +19,20 @@ import {
   StoredIdentity,
 } from "./client.types";
 
-export const CURRENT_PROVIDER_KEY = "CURRENT_PROVIDER_KEY";
 export const STORED_IDENTITIES_KEY = "STORED_IDENTITIES_KEY";
 
 export class Client {
   private identities: IdentityMap = new Map();
-  private currentProvider: IdentityProvider | undefined;
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
 
   private constructor(private readonly config: ClientConfig) {
     this.eventEmitter = new EventEmitter(config.eventManager);
     this.eventListener = new EventListener(config.eventManager);
-
-    this.setEventListeners();
   }
 
   public async init(): Promise<void> {
     await this.loadStoredIdentities();
-    const currentProvider = await this.config.storage.getItem(CURRENT_PROVIDER_KEY);
-
-    if (currentProvider) {
-      await this.setCurrentProvider(currentProvider);
-    }
-  }
-
-  private setEventListeners(): void {
-    this.eventListener.connectSuccess((payload) => {
-      const { delegation, keyIdentity, provider } = payload;
-      this.registerIdentity(delegation, keyIdentity, provider);
-    });
-
-    this.eventListener.disconnectSuccess((payload) => {
-      this.removeIdentity(payload.identity.getPrincipal());
-    });
   }
 
   private createAgent(options: HttpAgentOptions): HttpAgent {
@@ -74,7 +47,6 @@ export class Client {
   private async loadStoredIdentities(): Promise<void> {
     const storedIdentities = await this.config.storage.getItem(STORED_IDENTITIES_KEY);
     const identities: StoredIdentity[] = storedIdentities ? JSON.parse(storedIdentities) : [];
-    console.log("Identities", identities);
 
     for (const identity of identities) {
       const pubKey = fromHex(identity.pubKey);
@@ -112,31 +84,53 @@ export class Client {
     this.config.storage.setItem(STORED_IDENTITIES_KEY, JSON.stringify(storedIdentities));
   }
 
-  public async registerIdentity(
+  public async addIdentity(
     delegation: DelegationChain,
     keyIdentity: Ed25519KeyIdentity,
     provider: string
   ): Promise<void> {
-    const storedIdentity: StoredIdentity = {
-      // keyIdentity: keyIdentity,
-      secretKey: toHex(keyIdentity.getKeyPair().secretKey),
-      pubKey: toHex(keyIdentity.getPublicKey().toDer()),
-      delegation: delegation,
-      provider,
-    };
+    try {
+      const storedIdentity: StoredIdentity = {
+        secretKey: toHex(keyIdentity.getKeyPair().secretKey),
+        pubKey: toHex(keyIdentity.getPublicKey().toDer()),
+        delegation: delegation,
+        provider,
+      };
 
-    await this.storeIdentity(storedIdentity);
+      await this.storeIdentity(storedIdentity);
 
-    const identity = DelegationIdentity.fromDelegation(keyIdentity, delegation);
+      const identity = DelegationIdentity.fromDelegation(keyIdentity, delegation);
 
-    this.identities.set(identity.getPrincipal().toString(), {
-      identity,
-      provider,
-    });
+      this.identities.set(identity.getPrincipal().toString(), {
+        identity,
+        provider,
+      });
+
+      this.eventEmitter.identityAdded(identity, provider);
+    } catch (error) {
+      throw error;
+    }
   }
 
-  public removeIdentity(principal: Principal): void {
-    this.identities.delete(principal.toString());
+  public async removeIdentity(identity: Identity): Promise<void> {
+    const principalToRemove = identity.getPrincipal();
+
+    const storedIdentities = await this.getStoredIdentities();
+
+    const toStoreIdentities = storedIdentities.filter((item) => {
+      const pubKey = fromHex(item.pubKey);
+      const privateKey = fromHex(item.secretKey);
+      const keyIdentity = Ed25519KeyIdentity.fromKeyPair(privateKey, pubKey);
+      const delegation = DelegationChain.fromJSON(item.delegation);
+      const delegationIdentity = DelegationIdentity.fromDelegation(keyIdentity, delegation);
+      return delegationIdentity.getPrincipal().compareTo(principalToRemove) !== "eq";
+    });
+
+    await this.config.storage.setItem(STORED_IDENTITIES_KEY, JSON.stringify(toStoreIdentities));
+
+    this.identities.delete(identity.getPrincipal().toString());
+
+    this.eventEmitter.identityRemoved(identity);
   }
 
   private createAgentOptions(identity: Identity, agentConfig?: HttpAgentOptions) {
@@ -199,46 +193,14 @@ export class Client {
     return this.config.providers || [];
   }
 
-  public getProvider(name: string): IdentityProvider | undefined {
-    return this.getProviders().find((provider) => provider.name === name);
-  }
+  public getProvider(name: string): IdentityProvider {
+    const provider = this.getProviders().find((provider) => provider.name === name);
 
-  // TODO: Provider management should be outside of the client
-  public async setCurrentProvider(provider: string): Promise<void> {
-    const currentProvider = this.getProvider(provider);
-
-    if (currentProvider) {
-      try {
-        const initOptions = {
-          connect: {
-            onSuccess: (payload: AuthConnectSuccessPayload) => this.eventEmitter.connectSuccess(payload),
-            onError: (payload: AuthConnectErrorPayload) => this.eventEmitter.connectError(payload),
-          },
-          disconnect: {
-            onSuccess: () => this.eventEmitter.disconnectSuccess(),
-            onError: (payload: AuthDisconnectErrorPayload) => this.eventEmitter.disconnectError(payload),
-          },
-        };
-
-        await currentProvider.init(initOptions);
-        await this.config.storage.setItem(CURRENT_PROVIDER_KEY, currentProvider.name);
-        this.currentProvider = currentProvider;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    } else {
-      this.removeCurrentProvider();
+    if (!provider) {
+      throw new ProviderNotFoundError(name);
     }
-  }
 
-  public async removeCurrentProvider(): Promise<void> {
-    await this.config.storage.removeItem(CURRENT_PROVIDER_KEY);
-    this.currentProvider = undefined;
-  }
-
-  public getCurrentProvider(): IdentityProvider | undefined {
-    return this.currentProvider;
+    return provider;
   }
 
   public static create(config: CreateClientConfig): Client {

@@ -3,7 +3,8 @@ import { AuthClient } from "@dfinity/auth-client";
 import { DelegationIdentity, Ed25519KeyIdentity, Ed25519PublicKey } from "@dfinity/identity";
 import { IncompleteIdentity } from "identity-providers/incomplete-identity";
 
-import { IdentityProvider, InitOptions } from "../identity-provider.interface";
+import { Client } from "../../client";
+import { IdentityProvider } from "../identity-provider.interface";
 import { InternetIdentityConfig } from "./internet-identity.types";
 
 const defaultConfig: InternetIdentityConfig = {
@@ -18,9 +19,9 @@ export class InternetIdentity implements IdentityProvider {
   public readonly displayName = "Internet Identity";
   // TODO: Add logo svg
   public readonly logo = "";
+  private client: Client | undefined;
   private config: InternetIdentityConfig = defaultConfig;
   private authClient: AuthClient | undefined;
-  private options: InitOptions | undefined;
   private keyIdentity: Ed25519KeyIdentity;
   private identity: IncompleteIdentity;
 
@@ -34,18 +35,20 @@ export class InternetIdentity implements IdentityProvider {
     };
   }
 
-  public async init(options: InitOptions): Promise<void> {
-    this.options = options;
+  public async init(client: Client): Promise<void> {
+    this.client = client;
 
     this.authClient = await AuthClient.create({
       identity: this.identity,
     });
   }
 
-  public connect(): Promise<void> {
+  public connect() {
+    if (!this.authClient || !this.client) throw new Error("init must be called before this method");
+
     return new Promise<void>((resolve, reject) => {
-      if (this.authClient) {
-        this.authClient.login({
+      try {
+        this.authClient!.login({
           identityProvider: this.config.providerUrl,
           // TODO: allow to set maxTimeToLive from options
           maxTimeToLive: DEFAULT_MAX_TIME_TO_LIVE,
@@ -55,53 +58,31 @@ export class InternetIdentity implements IdentityProvider {
             if (identity instanceof DelegationIdentity) {
               const delegation = identity.getDelegation();
 
-              this.options?.connect.onSuccess({
-                identity,
-                keyIdentity: this.keyIdentity,
-                delegation,
-                provider: this.name,
-              });
+              await this.client!.addIdentity(delegation, this.keyIdentity, this.name);
 
               resolve();
             }
 
-            reject("Identity is not a DelegationIdentity:");
+            reject("identity is not a DelegationIdentity");
           },
           onError: (reason) => {
-            const message = reason || "Unknown error";
-
-            this.options?.connect.onError({ message });
-
-            reject(reason);
+            reject(new Error(reason));
           },
         });
-      } else {
-        throw new Error("init must be called before this method");
-      }
-    });
-  }
-
-  public async disconnect(): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
-      try {
-        if (this.authClient) {
-          const identity = this.authClient.getIdentity();
-          this.options?.disconnect.onSuccess({ identity });
-          await this.authClient.logout();
-          resolve();
-        } else {
-          reject("init must be called before this method");
-        }
-      } catch (error: any) {
-        this.options?.disconnect.onError({ message: error.message });
+      } catch (error) {
         reject(error);
       }
     });
   }
 
-  public getIdentity(): Identity {
-    if (!this.authClient) throw new Error("init must be called before this method");
+  public async disconnect(identity: Identity): Promise<void> {
+    if (!this.authClient || !this.client) throw new Error("init must be called before this method");
 
-    return this.authClient?.getIdentity();
+    try {
+      await this.authClient.logout();
+      this.client.removeIdentity(identity);
+    } catch (error) {
+      throw error;
+    }
   }
 }

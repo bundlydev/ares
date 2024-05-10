@@ -4,15 +4,15 @@ import { useContext } from "react";
 import { IcpConnectContext } from "../context";
 
 export type Auth = {
-  identity: Identity;
+  currentIdentity: Identity;
   isAuthenticated: boolean;
 };
 
 export const useAuth = (): Auth => {
-  const { isAuthenticated, identity } = useContext(IcpConnectContext);
+  const { isAuthenticated, currentIdentity } = useContext(IcpConnectContext);
 
   return {
-    identity,
+    currentIdentity,
     isAuthenticated,
   };
 };
