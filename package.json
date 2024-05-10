@@ -17,12 +17,13 @@
     "Typescript"
   ],
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "turbo run build",
-    "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
