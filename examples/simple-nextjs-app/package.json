@@ -10,8 +10,8 @@
     "clean": "rm -rf .next && rm -rf .turbo && rm -rf build && rm -rf src/declarations && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ares-core": "0.2.0-beta.7",
-    "@bundly/ares-react": "^0.2.0-beta.5",
+    "@bundly/ares-core": "0.2.0-beta.8",
+    "@bundly/ares-react": "^0.2.0-beta.6",
     "@dfinity/agent": "^1.3.0",
     "next": "14.2.3",
     "react": "^18.3.1",
