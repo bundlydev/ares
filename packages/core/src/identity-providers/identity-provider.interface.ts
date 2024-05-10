@@ -1,6 +1,11 @@
 import { Identity } from "@dfinity/agent";
 
-import { AuthConnectErrorPayload, AuthConnectSuccessPayload, AuthDisconnectErrorPayload } from "../events";
+import {
+  AuthConnectErrorPayload,
+  AuthConnectSuccessPayload,
+  AuthDisconnectErrorPayload,
+  AuthDisconnectSuccessPayload,
+} from "../events";
 
 export type AppLinkParams = {
   publicKey: string;
@@ -13,7 +18,7 @@ export type InitOptions = {
     onError: (error: AuthConnectErrorPayload) => void;
   };
   disconnect: {
-    onSuccess: () => void;
+    onSuccess: (payload: AuthDisconnectSuccessPayload) => void;
     onError: (error: AuthDisconnectErrorPayload) => void;
   };
 };

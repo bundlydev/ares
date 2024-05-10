@@ -1,11 +1,5 @@
-import {
-  Actor,
-  ActorSubclass,
-  AnonymousIdentity,
-  HttpAgent,
-  HttpAgentOptions,
-  Identity,
-} from "@dfinity/agent";
+import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity, fromHex, toHex } from "@dfinity/agent";
+import { DelegationChain, DelegationIdentity, Ed25519KeyIdentity } from "@dfinity/identity";
 import { Principal } from "@dfinity/principal";
 import { EventEmitter as EventManager } from "events";
 
@@ -26,16 +20,16 @@ import {
   ClientConfig,
   CreateClientConfig,
   GetCandidActorOptions,
+  GetIdentitiesResult,
   IdentityMap,
   IdentityProviders,
   StoredIdentity,
 } from "./client.types";
 
 export const CURRENT_PROVIDER_KEY = "CURRENT_PROVIDER_KEY";
+export const STORED_IDENTITIES_KEY = "STORED_IDENTITIES_KEY";
 
 export class Client {
-  private identity = new AnonymousIdentity();
-  // TODO: use this for multiple identities
   private identities: IdentityMap = new Map();
   private currentProvider: IdentityProvider | undefined;
   public eventEmitter: EventEmitter;
@@ -44,14 +38,28 @@ export class Client {
   private constructor(private readonly config: ClientConfig) {
     this.eventEmitter = new EventEmitter(config.eventManager);
     this.eventListener = new EventListener(config.eventManager);
+
+    this.setEventListeners();
   }
 
   public async init(): Promise<void> {
+    await this.loadStoredIdentities();
     const currentProvider = await this.config.storage.getItem(CURRENT_PROVIDER_KEY);
 
     if (currentProvider) {
       await this.setCurrentProvider(currentProvider);
     }
+  }
+
+  private setEventListeners(): void {
+    this.eventListener.connectSuccess((payload) => {
+      const { delegation, keyIdentity, provider } = payload;
+      this.registerIdentity(delegation, keyIdentity, provider);
+    });
+
+    this.eventListener.disconnectSuccess((payload) => {
+      this.removeIdentity(payload.identity.getPrincipal());
+    });
   }
 
   private createAgent(options: HttpAgentOptions): HttpAgent {
@@ -63,28 +71,75 @@ export class Client {
     return agent;
   }
 
-  public async replaceIdentity(identity: Identity): Promise<void> {
-    this.identity = identity;
+  private async loadStoredIdentities(): Promise<void> {
+    const storedIdentities = await this.config.storage.getItem(STORED_IDENTITIES_KEY);
+    const identities: StoredIdentity[] = storedIdentities ? JSON.parse(storedIdentities) : [];
+    console.log("Identities", identities);
+
+    for (const identity of identities) {
+      const pubKey = fromHex(identity.pubKey);
+      const privateKey = fromHex(identity.secretKey);
+      const keyIdentity = Ed25519KeyIdentity.fromKeyPair(privateKey, pubKey);
+      const delegation = DelegationChain.fromJSON(identity.delegation);
+      const delegationIdentity = DelegationIdentity.fromDelegation(keyIdentity, delegation);
+      const principal = delegationIdentity.getPrincipal().toString();
+
+      this.identities.set(principal, {
+        identity: delegationIdentity,
+        provider: identity.provider,
+      });
+    }
   }
 
-  public getIdentities(): IdentityMap {
-    return this.identities;
+  private async getStoredIdentities(): Promise<StoredIdentity[]> {
+    const storedIdentities = await this.config.storage.getItem(STORED_IDENTITIES_KEY);
+    const identities: StoredIdentity[] = storedIdentities ? JSON.parse(storedIdentities) : [];
+    return identities;
   }
 
-  public setIdentity(principal: Principal, identity: StoredIdentity): void {
-    console.log("Setting identity", principal.toString(), identity);
-    this.identities.set(principal.toString(), identity);
+  public getIdentities(): GetIdentitiesResult {
+    const identities = Array.from(this.identities.entries()).map(([_, { identity, provider }]) => ({
+      identity,
+      provider,
+    }));
+
+    return identities;
+  }
+
+  private async storeIdentity(identity: StoredIdentity): Promise<void> {
+    const storedIdentities = await this.getStoredIdentities();
+    storedIdentities.push(identity);
+    this.config.storage.setItem(STORED_IDENTITIES_KEY, JSON.stringify(storedIdentities));
+  }
+
+  public async registerIdentity(
+    delegation: DelegationChain,
+    keyIdentity: Ed25519KeyIdentity,
+    provider: string
+  ): Promise<void> {
+    const storedIdentity: StoredIdentity = {
+      // keyIdentity: keyIdentity,
+      secretKey: toHex(keyIdentity.getKeyPair().secretKey),
+      pubKey: toHex(keyIdentity.getPublicKey().toDer()),
+      delegation: delegation,
+      provider,
+    };
+
+    await this.storeIdentity(storedIdentity);
+
+    const identity = DelegationIdentity.fromDelegation(keyIdentity, delegation);
+
+    this.identities.set(identity.getPrincipal().toString(), {
+      identity,
+      provider,
+    });
   }
 
   public removeIdentity(principal: Principal): void {
     this.identities.delete(principal.toString());
   }
 
-  public getIdentity(): Identity {
-    return this.identity;
-  }
-
-  private createAgentOptions(agentConfig?: HttpAgentOptions) {
+  private createAgentOptions(identity: Identity, agentConfig?: HttpAgentOptions) {
     const baseOptions = agentConfig || this.config.agentConfig;
 
     if (!baseOptions) {
@@ -94,39 +149,37 @@ export class Client {
     const options = {
       ...baseOptions,
       host: baseOptions.host || "http://localhost:4943",
-      identity: this.identity,
+      identity,
     };
 
     return options;
   }
 
   // TODO: Options should be optional?
-  public getCandidActor(name: string, options: GetCandidActorOptions): ActorSubclass {
+  public getCandidActor(name: string, identity: Identity, options?: GetCandidActorOptions): ActorSubclass {
     const canister = this.config.candidCanisters?.get(name);
 
     if (!canister) {
       throw new CanisterDoesNotExistError(name);
     }
 
-    const agentOptions = this.createAgentOptions(canister.agentConfig);
+    const agentOptions = this.createAgentOptions(identity, canister.agentConfig);
     const agent = this.createAgent({
       ...agentOptions,
-      // TODO: remove agentOptions.identity
-      identity: options.identity || agentOptions.identity,
     });
 
     url.isLocal(agentOptions.host) && agent.fetchRootKey().then(() => console.log("Root key fetched"));
 
     const actor = Actor.createActor(canister.idlFactory, {
       ...canister.actorConfig,
-      canisterId: options.canisterId || canister.actorConfig.canisterId,
+      canisterId: options?.canisterId || canister.actorConfig.canisterId,
       agent,
     });
 
     return actor;
   }
 
-  public getRestActor(name: string): RestClientInstance {
+  public getRestActor(name: string, identity: Identity): RestClientInstance {
     const canister = this.config.restCanisters?.get(name);
 
     if (!canister) {
@@ -136,7 +189,7 @@ export class Client {
     // TODO: Modify restClient to accept an agent
     const actor = restClient.create({
       baseURL: canister?.baseUrl,
-      identity: this.identity,
+      identity,
     });
 
     return actor;
@@ -168,9 +221,7 @@ export class Client {
         };
 
         await currentProvider.init(initOptions);
-        const identity = currentProvider.getIdentity();
         await this.config.storage.setItem(CURRENT_PROVIDER_KEY, currentProvider.name);
-        this.replaceIdentity(identity);
         this.currentProvider = currentProvider;
       } catch (error) {
         console.error(error);
@@ -183,7 +234,6 @@ export class Client {
 
   public async removeCurrentProvider(): Promise<void> {
     await this.config.storage.removeItem(CURRENT_PROVIDER_KEY);
-    this.replaceIdentity(new AnonymousIdentity());
     this.currentProvider = undefined;
   }
 

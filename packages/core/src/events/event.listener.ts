@@ -10,13 +10,14 @@ import {
   AuthConnectErrorPayload,
   AuthConnectSuccessPayload,
   AuthDisconnectErrorPayload,
+  AuthDisconnectSuccessPayload,
 } from "./event.types";
 
 export type ListenAuthConnectSuccessCallback = (payload: AuthConnectSuccessPayload) => void;
 
 export type ListenAuthConnectErrorCallback = (payload: AuthConnectErrorPayload) => void;
 
-export type ListenAuthDisconnectSuccessCallback = () => void;
+export type ListenAuthDisconnectSuccessCallback = (payload: AuthDisconnectSuccessPayload) => void;
 
 export type ListenAuthDisconnectErrorCallback = (payload: AuthDisconnectErrorPayload) => void;
 

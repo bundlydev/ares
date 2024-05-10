@@ -38,7 +38,8 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
       return;
     }
 
-    const identity = client.getIdentity();
+    // TODO: get this from state or take the first one or set it to anonymous
+    const identity = client.getIdentities()[0]?.identity || new AnonymousIdentity();
     const isAuthenticated = !identity.getPrincipal().isAnonymous();
 
     setIdentity(identity);
@@ -49,7 +50,6 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
   function setListeners(client: Client) {
     // TODO: Maybe these listeners should be moved to the client
     client.eventListener.connectSuccess((payload) => {
-      client.replaceIdentity(payload.identity);
       setIdentity(payload.identity);
       setIsAuthenticated(true);
     });
@@ -61,7 +61,6 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
 
   function setAnonymousIdentity() {
     const anonymousIdentity = new AnonymousIdentity();
-    client.replaceIdentity(anonymousIdentity);
     setIdentity(anonymousIdentity);
     setIsAuthenticated(false);
   }

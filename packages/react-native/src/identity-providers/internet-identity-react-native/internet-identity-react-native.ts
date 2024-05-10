@@ -99,7 +99,13 @@ export class InternetIdentityReactNative implements IdentityProvider {
 
       this._identity = identity;
 
-      this.options?.connect.onSuccess({ identity });
+      // TODO: fix this, need tests
+      this.options?.connect.onSuccess({
+        identity: this._identity,
+        keyIdentity: this._key,
+        delegation: chain,
+        provider: this.name,
+      });
     } catch (error: any) {
       this.options?.connect.onError({ message: error.message });
     }
@@ -128,9 +134,9 @@ export class InternetIdentityReactNative implements IdentityProvider {
   public async disconnect(): Promise<void> {
     try {
       await this.deleteChain();
+      this.options?.disconnect.onSuccess({ identity: this._identity });
       this._identity = new AnonymousIdentity();
       this._chain = null;
-      this.options?.disconnect.onSuccess();
     } catch (error: any) {
       this.options?.disconnect.onError({ message: error.message });
     }
