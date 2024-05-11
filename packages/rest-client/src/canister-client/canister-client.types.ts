@@ -1,4 +1,4 @@
-import { ActorMethod, Identity } from "@dfinity/agent";
+import { ActorMethod } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 
 export type QueryConfig = {
