@@ -1,12 +1,11 @@
-import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
-import { DelegationChain, Ed25519KeyIdentity } from "@dfinity/identity";
+import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity, SignIdentity } from "@dfinity/agent";
+import { DelegationChain, PartialIdentity } from "@dfinity/identity";
 import { EventEmitter as EventManager } from "events";
 
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
 
 import { EventEmitter, EventListener } from "../events";
-import { ClientStorageInterface } from "../storage";
-import { LocalStorage } from "../storage/local-storage";
+import { ClientStorageInterface, LocalStorage } from "../storage";
 import * as url from "../utils/url";
 import { AgentNotDefinedError, CanisterDoesNotExistError, ProviderNotFoundError } from "./client.errors";
 import {
@@ -72,7 +71,7 @@ export class Client {
   }
 
   public async addIdentity(
-    keyIdentity: Ed25519KeyIdentity,
+    keyIdentity: SignIdentity | PartialIdentity,
     delegationChain: DelegationChain,
     provider: string
   ): Promise<void> {

@@ -1,10 +1,16 @@
-import { Identity } from "@dfinity/agent";
+import { Identity, SignIdentity } from "@dfinity/agent";
 import { AuthClient, AuthClientStorage, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from "@dfinity/auth-client";
 import { StoredKey } from "@dfinity/auth-client/lib/cjs/storage";
-import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from "@dfinity/identity";
+import {
+  DelegationChain,
+  ECDSAKeyIdentity,
+  Ed25519KeyIdentity,
+  PartialIdentity,
+  isDelegationValid,
+} from "@dfinity/identity";
 
 import { Client } from "../../client";
-import { ED25519_KEY_LABEL, IdentityProvider } from "../../client/identity-provider";
+import { BaseKeyType, ED25519_KEY_LABEL, IdentityProvider } from "../../client/identity-provider";
 import { InternetIdentityCreateOptions } from "./internet-identity.types";
 
 // Set default maxTimeToLive to 8 hours
@@ -37,6 +43,7 @@ export class InternetIdentity implements IdentityProvider {
   private client: Client | undefined;
   private authClient: AuthClient | undefined;
   private storage: AuthClientStorage = new TempStorage();
+  private keyType: BaseKeyType | undefined = ED25519_KEY_LABEL;
 
   constructor(private readonly config?: InternetIdentityCreateOptions) {}
 
@@ -45,7 +52,7 @@ export class InternetIdentity implements IdentityProvider {
 
     this.authClient = await AuthClient.create({
       storage: this.storage,
-      keyType: ED25519_KEY_LABEL,
+      keyType: this.keyType,
     });
   }
 
@@ -62,22 +69,38 @@ export class InternetIdentity implements IdentityProvider {
             const maybeIdentityStorage = await this.storage.get(KEY_STORAGE_KEY);
             const maybeDelegationStorage = await this.storage.get(KEY_STORAGE_DELEGATION);
             let delegationChain: DelegationChain | undefined;
-            let keyIdentity: Ed25519KeyIdentity | undefined;
+            let keyIdentity: null | SignIdentity | PartialIdentity = null;
 
-            if (typeof maybeIdentityStorage === "string") {
-              keyIdentity = Ed25519KeyIdentity.fromJSON(maybeIdentityStorage);
-            } else {
-              reject("Identity storage not found or invalid");
-            }
+            if (maybeDelegationStorage) {
+              if (typeof maybeDelegationStorage === "string") {
+                delegationChain = DelegationChain.fromJSON(maybeDelegationStorage);
 
-            if (typeof maybeDelegationStorage === "string") {
-              delegationChain = DelegationChain.fromJSON(maybeDelegationStorage);
-
-              if (!isDelegationValid(delegationChain)) {
-                reject("Invalid delegation chain found in storage");
+                if (!isDelegationValid(delegationChain)) {
+                  reject("Invalid delegation chain found in storage");
+                }
+              } else {
+                reject("Delegation must be a string");
               }
             } else {
-              reject("Delegation storage not found or invalid");
+              reject("Delegation storage not found");
+            }
+
+            if (maybeIdentityStorage) {
+              if (typeof maybeIdentityStorage === "object") {
+                if (this.keyType === ED25519_KEY_LABEL && typeof maybeIdentityStorage === "string") {
+                  console.log("Creating Ed25519KeyIdentity from JSON");
+                  keyIdentity = Ed25519KeyIdentity.fromJSON(maybeIdentityStorage);
+                } else {
+                  console.log("Creating ECDSAKeyIdentity from KeyPair");
+                  keyIdentity = await ECDSAKeyIdentity.fromKeyPair(maybeIdentityStorage);
+                }
+              } else if (typeof maybeIdentityStorage === "string") {
+                console.log("Creating Ed25519KeyIdentity from JSON");
+                // This is a legacy identity, which is a serialized Ed25519KeyIdentity.
+                keyIdentity = Ed25519KeyIdentity.fromJSON(maybeIdentityStorage);
+              }
+            } else {
+              reject("Identity storage not found");
             }
 
             if (keyIdentity && delegationChain) {

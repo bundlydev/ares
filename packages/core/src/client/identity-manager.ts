@@ -1,5 +1,5 @@
-import { Identity, toHex } from "@dfinity/agent";
-import { DelegationChain, Ed25519KeyIdentity } from "@dfinity/identity";
+import { Identity, SignIdentity, toHex } from "@dfinity/agent";
+import { DelegationChain, Ed25519KeyIdentity, PartialIdentity } from "@dfinity/identity";
 import { ClientStorageInterface } from "storage";
 
 export const KEY_STORED_IDENTITIES = "STORED_IDENTITIES_KEY";
@@ -64,10 +64,14 @@ export class IdentityManager {
   }
 
   public async persist(
-    keyIdentity: Ed25519KeyIdentity,
+    keyIdentity: SignIdentity | PartialIdentity,
     delegationChain: DelegationChain,
     provider: string
   ): Promise<void> {
+    if (!(keyIdentity instanceof Ed25519KeyIdentity)) {
+      throw new Error("Unsupported identity type");
+    }
+
     const principal = keyIdentity.getPrincipal().toString();
 
     const PersistentIdentity: PersistentIdentity = {
