@@ -1,49 +1,34 @@
-import { AnonymousIdentity, Identity, SignIdentity, toHex } from "@dfinity/agent";
-import {
-  DelegationChain,
-  DelegationIdentity,
-  Ed25519KeyIdentity,
-  isDelegationValid,
-} from "@dfinity/identity";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Identity, SignIdentity, toHex } from "@dfinity/agent";
+import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from "@dfinity/identity";
 // TODO: replace expo-secure-store with another secure storage
 import * as SecureStore from "expo-secure-store";
 
-import { AppLinkParams, IdentityProvider, InitOptions } from "@bundly/ares-core";
+import { Client, IdentityProvider } from "@bundly/ares-core";
 
 import { InternetIdentityReactNativeConfig } from "./internet-identity-react-native.types";
 
 export const KEY_STORAGE_KEY = "identity";
-export const KEY_STORAGE_DELEGATION = "delegation";
 
-export type StoredKey = string | CryptoKeyPair;
+type AppLinkParams = {
+  delegation: string;
+  publicKey: string;
+};
 
 export class InternetIdentityReactNative implements IdentityProvider {
   public readonly name = "internet-identity-middleware";
   public readonly displayName = "Internet Identity";
   public readonly logo = "";
-  private _identity: Identity = new AnonymousIdentity();
   private _key: SignIdentity | null = null;
-  private _chain: DelegationChain | null = null;
-  private options: InitOptions | undefined;
+  private client: Client | undefined;
 
   constructor(private readonly config: InternetIdentityReactNativeConfig) {}
 
-  public async init(options: InitOptions): Promise<void> {
-    this.options = options;
+  public async init(client: Client): Promise<void> {
     const localKey = await this.getKey();
-    const localChain = await this.getChain();
-
-    if (localChain && !isDelegationValid(localChain)) {
-      await this.deleteChain();
-    }
+    this.client = client;
 
     if (localKey) {
       this._key = localKey;
-      if (localChain && isDelegationValid(localChain)) {
-        const identity = DelegationIdentity.fromDelegation(localKey, localChain);
-        this._identity = identity;
-      }
     } else {
       const key = Ed25519KeyIdentity.generate();
       await this.saveKey(key);
@@ -59,20 +44,6 @@ export class InternetIdentityReactNative implements IdentityProvider {
   private saveKey(key: Ed25519KeyIdentity): Promise<void> {
     this._key = key;
     return SecureStore.setItemAsync(KEY_STORAGE_KEY, JSON.stringify(key));
-  }
-
-  private async getChain(): Promise<DelegationChain | undefined> {
-    const storedDelegation = await AsyncStorage.getItem(KEY_STORAGE_DELEGATION);
-    if (storedDelegation) return DelegationChain.fromJSON(JSON.parse(storedDelegation));
-  }
-
-  private saveChain(chain: DelegationChain): Promise<void> {
-    this._chain = chain;
-    return AsyncStorage.setItem(KEY_STORAGE_DELEGATION, JSON.stringify(chain.toJSON()));
-  }
-
-  private deleteChain(): Promise<void> {
-    return AsyncStorage.removeItem(KEY_STORAGE_DELEGATION);
   }
 
   public async onAppLinkOpened(params: AppLinkParams): Promise<void> {
@@ -93,21 +64,9 @@ export class InternetIdentityReactNative implements IdentityProvider {
     if (!isDelegationValid(chain)) throw new Error("delegation is not valid");
 
     try {
-      await this.saveChain(chain);
-
-      const identity: DelegationIdentity = DelegationIdentity.fromDelegation(this._key, this._chain!);
-
-      this._identity = identity;
-
-      // TODO: fix this, need tests
-      this.options?.connect.onSuccess({
-        identity: this._identity,
-        keyIdentity: this._key,
-        delegation: chain,
-        provider: this.name,
-      });
-    } catch (error: any) {
-      this.options?.connect.onError({ message: error.message });
+      this.client?.addIdentity(this._key, chain, this.name);
+    } catch (error) {
+      throw error;
     }
   }
 
@@ -131,18 +90,9 @@ export class InternetIdentityReactNative implements IdentityProvider {
     }
   }
 
-  public async disconnect(): Promise<void> {
-    try {
-      await this.deleteChain();
-      this.options?.disconnect.onSuccess({ identity: this._identity });
-      this._identity = new AnonymousIdentity();
-      this._chain = null;
-    } catch (error: any) {
-      this.options?.disconnect.onError({ message: error.message });
-    }
-  }
+  public async disconnect(identity: Identity): Promise<void> {
+    if (!this.client) throw new Error("init must be called before this method");
 
-  public getIdentity(): Identity {
-    return this._identity;
+    return this.client.removeIdentity(identity);
   }
 }

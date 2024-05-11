@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { ClientStorage } from "@bundly/ares-core";
+import { ClientStorageInterface } from "@bundly/ares-core";
 
-export class ReactNativeStorage implements ClientStorage {
+export class ReactNativeStorage implements ClientStorageInterface {
   public async getItem(key: string) {
     return AsyncStorage.getItem(key);
   }
