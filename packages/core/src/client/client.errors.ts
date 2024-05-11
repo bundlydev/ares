@@ -9,3 +9,9 @@ export class ProviderNotFoundError extends Error {
     super(`Provider ${providerName} not found`);
   }
 }
+
+export class AgentNotDefinedError extends Error {
+  constructor() {
+    super("You must provide an agent for the canister or set a default agent");
+  }
+}

@@ -4,13 +4,8 @@ import { StoredKey } from "@dfinity/auth-client/lib/cjs/storage";
 import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from "@dfinity/identity";
 
 import { Client } from "../../client";
-import { ED25519_KEY_LABEL } from "../../identity-providers/internet-provider.constants";
-import { IdentityProvider } from "../identity-provider.interface";
-import { InternetIdentityConfig } from "./internet-identity.types";
-
-const defaultConfig: InternetIdentityConfig = {
-  providerUrl: "https://identity.ic0.app",
-};
+import { ED25519_KEY_LABEL, IdentityProvider } from "../../client/identity-provider";
+import { InternetIdentityCreateOptions } from "./internet-identity.types";
 
 // Set default maxTimeToLive to 8 hours
 const DEFAULT_MAX_TIME_TO_LIVE = /* hours */ BigInt(8) * /* nanoseconds */ BigInt(3_600_000_000_000);
@@ -40,16 +35,10 @@ export class InternetIdentity implements IdentityProvider {
   // TODO: Add logo svg
   public readonly logo = "";
   private client: Client | undefined;
-  private config: InternetIdentityConfig = defaultConfig;
   private authClient: AuthClient | undefined;
   private storage: AuthClientStorage = new TempStorage();
 
-  constructor(config: InternetIdentityConfig = {}) {
-    this.config = {
-      ...this.config,
-      ...config,
-    };
-  }
+  constructor(private readonly config?: InternetIdentityCreateOptions) {}
 
   public async init(client: Client): Promise<void> {
     this.client = client;
@@ -66,9 +55,9 @@ export class InternetIdentity implements IdentityProvider {
     return new Promise<void>((resolve, reject) => {
       try {
         this.authClient!.login({
-          identityProvider: this.config.providerUrl,
+          identityProvider: this.config?.identityProvider,
           // TODO: allow to set maxTimeToLive from options
-          maxTimeToLive: DEFAULT_MAX_TIME_TO_LIVE,
+          maxTimeToLive: this.config?.maxTimeToLive || DEFAULT_MAX_TIME_TO_LIVE,
           onSuccess: async () => {
             const maybeIdentityStorage = await this.storage.get(KEY_STORAGE_KEY);
             const maybeDelegationStorage = await this.storage.get(KEY_STORAGE_DELEGATION);

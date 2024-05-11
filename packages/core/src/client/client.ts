@@ -5,11 +5,10 @@ import { EventEmitter as EventManager } from "events";
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
 
 import { EventEmitter, EventListener } from "../events";
-import { IdentityProvider } from "../identity-providers";
 import { ClientStorageInterface } from "../storage";
 import { LocalStorage } from "../storage/local-storage";
 import * as url from "../utils/url";
-import { CanisterDoesNotExistError, ProviderNotFoundError } from "./client.errors";
+import { AgentNotDefinedError, CanisterDoesNotExistError, ProviderNotFoundError } from "./client.errors";
 import {
   ClientConfig,
   CreateClientConfig,
@@ -19,6 +18,7 @@ import {
   IdentityProviders,
 } from "./client.types";
 import { IdentityManager } from "./identity-manager";
+import { IdentityProvider } from "./identity-provider";
 
 export class Client {
   private identities: IdentityMap = new Map();
@@ -99,7 +99,7 @@ export class Client {
     const baseOptions = agentConfig || this.config.agentConfig;
 
     if (!baseOptions) {
-      throw new Error("You must provide an agent for the canister or set a default agent.");
+      throw new AgentNotDefinedError();
     }
 
     const options = {
