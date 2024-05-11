@@ -92,6 +92,7 @@ export class Client {
 
   public async removeIdentity(identity: Identity): Promise<void> {
     await this.identityManager.remove(identity);
+    this.identities.delete(identity.getPrincipal().toString());
     this.eventEmitter.identityRemoved(identity);
   }
 

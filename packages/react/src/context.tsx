@@ -4,7 +4,6 @@ import React, { ReactNode, createContext, useEffect, useState } from "react";
 import { Client } from "@bundly/ares-core";
 
 export type IcpConnectContextType = {
-  // TODO: Test if this can be removed
   client: Client;
   currentIdentity: Identity;
   isAuthenticated: boolean;
@@ -39,9 +38,9 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
     await client.init();
     setListeners(client);
 
-    const identities = client.getIdentities();
-    setIdentities(identities);
-    const identity = identities[0]?.identity || new AnonymousIdentity();
+    const storedIdentities = client.getIdentities();
+    setIdentities(storedIdentities);
+    const identity = storedIdentities[0]?.identity || new AnonymousIdentity();
     const isAuthenticated = !identity.getPrincipal().isAnonymous();
 
     setCurrentIdentity(identity);
@@ -57,12 +56,11 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
     });
 
     client.eventListener.onIdentityRemoved((payload) => {
-      const identities = client
-        .getIdentities()
-        .filter((i) => i.identity.getPrincipal().toString() !== payload.identity.getPrincipal().toString());
-      setIdentities(identities);
+      const newIdentities = client.getIdentities();
 
-      const identity = identities[0]?.identity || new AnonymousIdentity();
+      setIdentities(newIdentities);
+
+      const identity = newIdentities[0]?.identity || new AnonymousIdentity();
       const isAuthenticated = !identity.getPrincipal().isAnonymous();
 
       setCurrentIdentity(identity);
