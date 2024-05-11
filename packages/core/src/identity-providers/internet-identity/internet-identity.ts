@@ -82,6 +82,8 @@ export class InternetIdentity implements IdentityProvider {
 
             if (keyIdentity && delegationChain) {
               this.client?.addIdentity(keyIdentity, delegationChain, this.name);
+              this.storage.remove(KEY_STORAGE_KEY);
+              this.storage.remove(KEY_STORAGE_DELEGATION);
               resolve();
             }
 
