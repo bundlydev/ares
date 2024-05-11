@@ -16,7 +16,6 @@ export function LogoutButton(props: LogoutButtonProps) {
     try {
       client.removeIdentity(identity);
     } catch (error) {
-      console.error(error);
       throw error;
     }
   }
