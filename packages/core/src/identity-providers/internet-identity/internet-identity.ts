@@ -1,9 +1,10 @@
 import { Identity } from "@dfinity/agent";
-import { AuthClient } from "@dfinity/auth-client";
-import { DelegationIdentity, Ed25519KeyIdentity, Ed25519PublicKey } from "@dfinity/identity";
-import { IncompleteIdentity } from "identity-providers/incomplete-identity";
+import { AuthClient, AuthClientStorage, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from "@dfinity/auth-client";
+import { StoredKey } from "@dfinity/auth-client/lib/cjs/storage";
+import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from "@dfinity/identity";
 
 import { Client } from "../../client";
+import { ED25519_KEY_LABEL } from "../../identity-providers/internet-provider.constants";
 import { IdentityProvider } from "../identity-provider.interface";
 import { InternetIdentityConfig } from "./internet-identity.types";
 
@@ -14,6 +15,25 @@ const defaultConfig: InternetIdentityConfig = {
 // Set default maxTimeToLive to 8 hours
 const DEFAULT_MAX_TIME_TO_LIVE = /* hours */ BigInt(8) * /* nanoseconds */ BigInt(3_600_000_000_000);
 
+export class TempStorage implements AuthClientStorage {
+  private storage = new Map<string, StoredKey>();
+
+  public get(key: string): Promise<StoredKey> {
+    const value = this.storage.get(key) as StoredKey;
+    return Promise.resolve(value);
+  }
+
+  public set(key: string, value: any): Promise<void> {
+    this.storage.set(key, value);
+    return Promise.resolve();
+  }
+
+  public remove(key: string): Promise<void> {
+    this.storage.delete(key);
+    return Promise.resolve();
+  }
+}
+
 export class InternetIdentity implements IdentityProvider {
   public readonly name = "internet-identity";
   public readonly displayName = "Internet Identity";
@@ -22,13 +42,9 @@ export class InternetIdentity implements IdentityProvider {
   private client: Client | undefined;
   private config: InternetIdentityConfig = defaultConfig;
   private authClient: AuthClient | undefined;
-  private keyIdentity: Ed25519KeyIdentity;
-  private identity: IncompleteIdentity;
+  private storage: AuthClientStorage = new TempStorage();
 
   constructor(config: InternetIdentityConfig = {}) {
-    this.keyIdentity = Ed25519KeyIdentity.generate();
-    const publicKey = this.keyIdentity.getPublicKey();
-    this.identity = new IncompleteIdentity(Ed25519PublicKey.fromDer(publicKey.toDer()));
     this.config = {
       ...this.config,
       ...config,
@@ -39,7 +55,8 @@ export class InternetIdentity implements IdentityProvider {
     this.client = client;
 
     this.authClient = await AuthClient.create({
-      identity: this.identity,
+      storage: this.storage,
+      keyType: ED25519_KEY_LABEL,
     });
   }
 
@@ -53,17 +70,33 @@ export class InternetIdentity implements IdentityProvider {
           // TODO: allow to set maxTimeToLive from options
           maxTimeToLive: DEFAULT_MAX_TIME_TO_LIVE,
           onSuccess: async () => {
-            const identity = this.authClient?.getIdentity();
+            const maybeIdentityStorage = await this.storage.get(KEY_STORAGE_KEY);
+            const maybeDelegationStorage = await this.storage.get(KEY_STORAGE_DELEGATION);
+            let delegationChain: DelegationChain | undefined;
+            let keyIdentity: Ed25519KeyIdentity | undefined;
 
-            if (identity instanceof DelegationIdentity) {
-              const delegation = identity.getDelegation();
+            if (typeof maybeIdentityStorage === "string") {
+              keyIdentity = Ed25519KeyIdentity.fromJSON(maybeIdentityStorage);
+            } else {
+              reject("Identity storage not found or invalid");
+            }
 
-              await this.client!.addIdentity(delegation, this.keyIdentity, this.name);
+            if (typeof maybeDelegationStorage === "string") {
+              delegationChain = DelegationChain.fromJSON(maybeDelegationStorage);
 
+              if (!isDelegationValid(delegationChain)) {
+                reject("Invalid delegation chain found in storage");
+              }
+            } else {
+              reject("Delegation storage not found or invalid");
+            }
+
+            if (keyIdentity && delegationChain) {
+              this.client?.addIdentity(keyIdentity, delegationChain, this.name);
               resolve();
             }
 
-            reject("identity is not a DelegationIdentity");
+            reject("Identity or delegation chain not found");
           },
           onError: (reason) => {
             reject(new Error(reason));

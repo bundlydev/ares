@@ -1,6 +1,6 @@
-import { StorageInterface } from "./storage.interface";
+import { ClientStorageInterface } from "./storage.interface";
 
-export class LocalStorage implements StorageInterface {
+export class LocalStorage implements ClientStorageInterface {
   public async getItem(key: string) {
     return localStorage.getItem(key);
   }
