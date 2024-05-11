@@ -1,17 +1,18 @@
-import { Identity, SignIdentity, toHex } from "@dfinity/agent";
-import { DelegationChain, Ed25519KeyIdentity, PartialIdentity } from "@dfinity/identity";
+import { Identity, SignIdentity } from "@dfinity/agent";
+import {
+  DelegationChain,
+  DelegationIdentity,
+  Ed25519KeyIdentity,
+  JsonnableDelegationChain,
+} from "@dfinity/identity";
+import { JsonnableEd25519KeyIdentity } from "@dfinity/identity/lib/cjs/identity/ed25519";
 import { ClientStorageInterface } from "storage";
 
 export const KEY_STORED_IDENTITIES = "STORED_IDENTITIES_KEY";
 
 export type PersistentIdentity = {
-  identity: {
-    // DerEncodedPublicKey to hex
-    publicKey: string;
-    // ArrayBuffer to hex
-    secretKey: string;
-  };
-  delegation: DelegationChain;
+  identity: JsonnableEd25519KeyIdentity;
+  delegation: JsonnableDelegationChain;
   provider: string;
 };
 
@@ -22,6 +23,16 @@ export type StoredIdentity = {
 
 export class IdentityManager {
   constructor(private storage: ClientStorageInterface) {}
+
+  private async getState(): Promise<Map<string, PersistentIdentity>> {
+    const jsonString = await this.storage.getItem(KEY_STORED_IDENTITIES);
+
+    if (!jsonString) {
+      return new Map();
+    }
+
+    return new Map(JSON.parse(jsonString));
+  }
 
   public setState(identities: Map<string, PersistentIdentity>): Promise<void> {
     return new Promise((resolve) => {
@@ -36,12 +47,12 @@ export class IdentityManager {
     const identities = new Map<string, StoredIdentity>();
 
     state.forEach((values, principal) => {
-      const publicKey = values.identity.publicKey;
-      const secretKey = values.identity.secretKey;
-      const identity = Ed25519KeyIdentity.fromParsedJson([publicKey, secretKey]);
+      const keyIdentity = Ed25519KeyIdentity.fromParsedJson(values.identity);
+      const delegationChain = DelegationChain.fromJSON(values.delegation);
+      const delegationIdentity = DelegationIdentity.fromDelegation(keyIdentity, delegationChain);
 
       identities.set(principal, {
-        identity,
+        identity: delegationIdentity,
         provider: values.provider,
       });
     });
@@ -49,43 +60,30 @@ export class IdentityManager {
     return identities;
   }
 
-  private async getState(): Promise<Map<string, PersistentIdentity>> {
-    const jsonString = await this.storage.getItem(KEY_STORED_IDENTITIES);
-
-    if (!jsonString) {
-      return new Map();
-    }
-
-    const regex = /(^"|"$)|\\+/g;
-    const jsonStringCleaned = jsonString.replace(regex, "");
-    const array = JSON.parse(jsonStringCleaned);
-
-    return new Map(array);
-  }
-
   public async persist(
-    keyIdentity: SignIdentity | PartialIdentity,
+    identity: SignIdentity,
     delegationChain: DelegationChain,
     provider: string
-  ): Promise<void> {
-    if (!(keyIdentity instanceof Ed25519KeyIdentity)) {
-      throw new Error("Unsupported identity type");
+  ): Promise<DelegationIdentity> {
+    if (!(identity instanceof Ed25519KeyIdentity)) {
+      throw new Error("Ed25519KeyIdentity is only supported for now");
     }
 
-    const principal = keyIdentity.getPrincipal().toString();
+    const delegationIdentity = DelegationIdentity.fromDelegation(identity, delegationChain);
+
+    const principal = delegationIdentity.getPrincipal();
 
     const PersistentIdentity: PersistentIdentity = {
-      identity: {
-        publicKey: toHex(keyIdentity.getKeyPair().publicKey.toDer()),
-        secretKey: toHex(keyIdentity.getKeyPair().secretKey),
-      },
-      delegation: delegationChain,
+      identity: identity.toJSON(),
+      delegation: delegationChain.toJSON(),
       provider,
     };
 
     const state = await this.getState();
-    state.set(principal, PersistentIdentity);
+    state.set(principal.toString(), PersistentIdentity);
     this.setState(state);
+
+    return delegationIdentity;
   }
 
   public async remove(identity: Identity): Promise<void> {

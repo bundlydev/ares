@@ -1,16 +1,10 @@
-import { Identity, SignIdentity } from "@dfinity/agent";
-import { AuthClient, AuthClientStorage, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from "@dfinity/auth-client";
+import { Identity } from "@dfinity/agent";
+import { AuthClient, AuthClientStorage } from "@dfinity/auth-client";
 import { StoredKey } from "@dfinity/auth-client/lib/cjs/storage";
-import {
-  DelegationChain,
-  ECDSAKeyIdentity,
-  Ed25519KeyIdentity,
-  PartialIdentity,
-  isDelegationValid,
-} from "@dfinity/identity";
+import { DelegationIdentity, Ed25519KeyIdentity, Ed25519PublicKey } from "@dfinity/identity";
 
-import { Client } from "../../client";
-import { BaseKeyType, ED25519_KEY_LABEL, IdentityProvider } from "../../client/identity-provider";
+import { Client, IncompleteEd25519KeyIdentity } from "../../client";
+import { IdentityProvider } from "../../client/identity-provider";
 import { InternetIdentityCreateOptions } from "./internet-identity.types";
 
 // Set default maxTimeToLive to 8 hours
@@ -42,75 +36,37 @@ export class InternetIdentity implements IdentityProvider {
   public readonly logo = "";
   private client: Client | undefined;
   private authClient: AuthClient | undefined;
-  private storage: AuthClientStorage = new TempStorage();
-  private keyType: BaseKeyType | undefined = ED25519_KEY_LABEL;
 
   constructor(private readonly config?: InternetIdentityCreateOptions) {}
 
   public async init(client: Client): Promise<void> {
     this.client = client;
-
-    this.authClient = await AuthClient.create({
-      storage: this.storage,
-      keyType: this.keyType,
-    });
   }
 
-  public connect() {
-    if (!this.authClient || !this.client) throw new Error("init must be called before this method");
+  public async connect() {
+    const keyIdentity = Ed25519KeyIdentity.generate();
+    const publicKey = Ed25519PublicKey.from(keyIdentity.getPublicKey());
+    const incompleteIdentity = new IncompleteEd25519KeyIdentity(publicKey);
+    // const storage = new TempStorage();
+    const client = await AuthClient.create({
+      identity: incompleteIdentity,
+    });
 
     return new Promise<void>((resolve, reject) => {
       try {
-        this.authClient!.login({
+        client.login({
           identityProvider: this.config?.identityProvider,
-          // TODO: allow to set maxTimeToLive from options
           maxTimeToLive: this.config?.maxTimeToLive || DEFAULT_MAX_TIME_TO_LIVE,
           onSuccess: async () => {
-            const maybeIdentityStorage = await this.storage.get(KEY_STORAGE_KEY);
-            const maybeDelegationStorage = await this.storage.get(KEY_STORAGE_DELEGATION);
-            let delegationChain: DelegationChain | undefined;
-            let keyIdentity: null | SignIdentity | PartialIdentity = null;
+            const clientIdentity = client.getIdentity();
 
-            if (maybeDelegationStorage) {
-              if (typeof maybeDelegationStorage === "string") {
-                delegationChain = DelegationChain.fromJSON(maybeDelegationStorage);
-
-                if (!isDelegationValid(delegationChain)) {
-                  reject("Invalid delegation chain found in storage");
-                }
-              } else {
-                reject("Delegation must be a string");
-              }
-            } else {
-              reject("Delegation storage not found");
-            }
-
-            if (maybeIdentityStorage) {
-              if (typeof maybeIdentityStorage === "object") {
-                if (this.keyType === ED25519_KEY_LABEL && typeof maybeIdentityStorage === "string") {
-                  console.log("Creating Ed25519KeyIdentity from JSON");
-                  keyIdentity = Ed25519KeyIdentity.fromJSON(maybeIdentityStorage);
-                } else {
-                  console.log("Creating ECDSAKeyIdentity from KeyPair");
-                  keyIdentity = await ECDSAKeyIdentity.fromKeyPair(maybeIdentityStorage);
-                }
-              } else if (typeof maybeIdentityStorage === "string") {
-                console.log("Creating Ed25519KeyIdentity from JSON");
-                // This is a legacy identity, which is a serialized Ed25519KeyIdentity.
-                keyIdentity = Ed25519KeyIdentity.fromJSON(maybeIdentityStorage);
-              }
-            } else {
-              reject("Identity storage not found");
-            }
-
-            if (keyIdentity && delegationChain) {
+            if (clientIdentity instanceof DelegationIdentity) {
+              const delegationChain = clientIdentity.getDelegation();
               this.client?.addIdentity(keyIdentity, delegationChain, this.name);
-              this.storage.remove(KEY_STORAGE_KEY);
-              this.storage.remove(KEY_STORAGE_DELEGATION);
               resolve();
             }
 
-            reject("Identity or delegation chain not found");
+            reject(new Error("Invalid delegation identity instance"));
           },
           onError: (reason) => {
             reject(new Error(reason));

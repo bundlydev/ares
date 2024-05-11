@@ -1,5 +1,5 @@
 import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity, SignIdentity } from "@dfinity/agent";
-import { DelegationChain, PartialIdentity } from "@dfinity/identity";
+import { DelegationChain } from "@dfinity/identity";
 import { EventEmitter as EventManager } from "events";
 
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
@@ -71,19 +71,19 @@ export class Client {
   }
 
   public async addIdentity(
-    keyIdentity: SignIdentity | PartialIdentity,
+    identity: SignIdentity,
     delegationChain: DelegationChain,
     provider: string
   ): Promise<void> {
     try {
-      await this.identityManager.persist(keyIdentity, delegationChain, provider);
+      const delegationIdentity = await this.identityManager.persist(identity, delegationChain, provider);
 
-      this.identities.set(keyIdentity.getPrincipal().toString(), {
-        identity: keyIdentity,
+      this.identities.set(delegationIdentity.getPrincipal().toString(), {
+        identity: delegationIdentity,
         provider,
       });
 
-      this.eventEmitter.identityAdded(keyIdentity, provider);
+      this.eventEmitter.identityAdded(delegationIdentity, provider);
     } catch (error) {
       throw error;
     }
