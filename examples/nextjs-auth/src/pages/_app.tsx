@@ -8,7 +8,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const client = Client.create({
     providers: [
       new InternetIdentity({
-        identityProvider: process.env.NEXT_PUBLIC_INTERNET_IDENTITY_URL!,
+        providerUrl: process.env.NEXT_PUBLIC_INTERNET_IDENTITY_URL!,
       }),
     ],
   });

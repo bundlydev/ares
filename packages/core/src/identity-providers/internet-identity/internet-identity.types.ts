@@ -1,4 +1,4 @@
 export type InternetIdentityCreateOptions = {
-  identityProvider?: string;
+  providerUrl?: string;
   maxTimeToLive?: bigint;
 };

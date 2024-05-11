@@ -9,7 +9,7 @@ import { InternetIdentityReactNativeConfig } from "./internet-identity-react-nat
 
 export const KEY_STORAGE_KEY = "identity";
 
-type AppLinkParams = {
+export type AppLinkParams = {
   delegation: string;
   publicKey: string;
 };

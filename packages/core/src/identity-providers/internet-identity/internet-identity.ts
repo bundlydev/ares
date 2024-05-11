@@ -55,7 +55,7 @@ export class InternetIdentity implements IdentityProvider {
     return new Promise<void>((resolve, reject) => {
       try {
         client.login({
-          identityProvider: this.config?.identityProvider,
+          identityProvider: this.config?.providerUrl,
           maxTimeToLive: this.config?.maxTimeToLive || DEFAULT_MAX_TIME_TO_LIVE,
           onSuccess: async () => {
             const clientIdentity = client.getIdentity();
