@@ -12,5 +12,6 @@ export interface IdentityProvider {
   logo: string;
   init: (client: Client, keyIdentity: Ed25519KeyIdentity) => Promise<void>;
   connect: () => Promise<void>;
+  // TODO: Maybe this method is not needed
   disconnect: (identity: Ed25519KeyIdentity) => Promise<void>;
 }

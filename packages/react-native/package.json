@@ -27,15 +27,14 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ares-core": "0.2.0-beta.8",
-    "@bundly/ares-react": "^0.2.0-beta.6",
+    "@bundly/ares-core": "0.2.0-beta.9",
+    "@bundly/ares-react": "^0.2.0-beta.7",
     "@dfinity/agent": "^1.3.0",
     "@dfinity/auth-client": "^1.3.0",
     "@dfinity/identity": "^1.3.0",
     "@dfinity/principal": "^1.3.0",
     "@react-native-async-storage/async-storage": "1.21.0",
     "expo-modules-core": "^1.5.12",
-    "expo-secure-store": "^12.5.0",
     "react-native": "^0.73"
   },
   "devDependencies": {

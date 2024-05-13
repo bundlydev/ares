@@ -14,8 +14,6 @@ export function InternetIdentityButton(props: LoginButtonProps) {
   const client = useClient();
 
   async function login() {
-    await provider.init(client);
-
     try {
       await provider.connect();
       props.onSuccess?.();
