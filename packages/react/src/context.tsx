@@ -8,6 +8,7 @@ export type IcpConnectContextType = {
   currentIdentity: Identity;
   isAuthenticated: boolean;
   identities: Identities;
+  changeCurrentIdentity: (identity: Identity) => void;
 };
 
 export type IcpConnectContextProviderProps = {
@@ -69,6 +70,10 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
     });
   }
 
+  function changeCurrentIdentity(identity: Identity) {
+    setCurrentIdentity(identity);
+  }
+
   return (
     initialized && (
       <IcpConnectContext.Provider
@@ -77,6 +82,7 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
           identities,
           currentIdentity,
           isAuthenticated,
+          changeCurrentIdentity,
         }}>
         {props.children}
       </IcpConnectContext.Provider>
