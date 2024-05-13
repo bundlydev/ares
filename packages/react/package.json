@@ -22,8 +22,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "prepublish": "npm run build",
-    "publish": "sh ../../scripts/publish.sh",
+    "prenpm:publish": "npm run build",
+    "npm:publish": "sh ../../scripts/publish.sh",
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "peerDependencies": {
@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@bundly/ares-rest": "^0.1.1-beta.0",
-    "@bundly/ares-core": "^0.2.0-beta.6",
+    "@bundly/ares-core": "^0.2.0-beta.9",
     "@dfinity/agent": "^1.3.0",
     "@dfinity/auth-client": "^1.3.0",
     "@dfinity/identity": "^1.3.0",

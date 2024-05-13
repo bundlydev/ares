@@ -30,8 +30,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "prepublish": "npm run build",
-    "publish": "sh ../../scripts/publish.sh",
+    "prenpm:publish": "npm run build",
+    "npm:publish": "sh ../../scripts/publish.sh",
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
