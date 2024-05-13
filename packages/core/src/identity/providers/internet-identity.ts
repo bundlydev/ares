@@ -3,9 +3,14 @@ import { AuthClient, AuthClientStorage } from "@dfinity/auth-client";
 import { StoredKey } from "@dfinity/auth-client/lib/cjs/storage";
 import { DelegationIdentity, Ed25519KeyIdentity, Ed25519PublicKey } from "@dfinity/identity";
 
-import { Client, IncompleteEd25519KeyIdentity } from "../../client";
-import { IdentityProvider } from "../../client/identity-provider";
-import { InternetIdentityCreateOptions } from "./internet-identity.types";
+import { Client } from "../../client";
+import { IdentityProvider } from "../identity-provider";
+import { IncompleteEd25519KeyIdentity } from "../incomplete-ed25519-key-identity";
+
+export type InternetIdentityCreateOptions = {
+  providerUrl?: string;
+  maxTimeToLive?: bigint;
+};
 
 // Set default maxTimeToLive to 8 hours
 const DEFAULT_MAX_TIME_TO_LIVE = /* hours */ BigInt(8) * /* nanoseconds */ BigInt(3_600_000_000_000);
@@ -27,7 +32,7 @@ export class EmptyStorage implements AuthClientStorage {
 export class InternetIdentity implements IdentityProvider {
   public readonly name = "internet-identity";
   public readonly displayName = "Internet Identity";
-  // TODO: Add logo svg
+  // TODO: Add svg logo
   public readonly logo = "";
   private client: Client | undefined;
   private keyIdentity: Ed25519KeyIdentity | undefined;

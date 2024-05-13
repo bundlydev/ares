@@ -10,8 +10,7 @@ export class IncompleteEd25519KeyIdentity extends SignIdentity {
   // @ts-ignore
   public sign(blob: ArrayBuffer): Promise<Signature> {}
 
-  // @ts-ignore
-  public getPublicKey() {
+  public getPublicKey(): Ed25519PublicKey {
     return this._publicKey;
   }
 }

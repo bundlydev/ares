@@ -1,6 +1,6 @@
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 
-import { Client } from "./client";
+import { Client } from "../client/client";
 
 export const ECDSA_KEY_LABEL = "ECDSA";
 export const ED25519_KEY_LABEL = "Ed25519";

@@ -3,9 +3,16 @@ import { DelegationChain, Ed25519KeyIdentity, isDelegationValid } from "@dfinity
 
 import { Client, IdentityProvider } from "@bundly/ares-core";
 
-import { InternetIdentityReactNativeConfig } from "./internet-identity-react-native.types";
+export type AppBrowser = {
+  open: (url: string) => void;
+  close: () => void;
+};
 
-export const KEY_STORAGE_KEY = "identity";
+export type InternetIdentityReactNativeConfig = {
+  providerUrl: string;
+  appLink: string;
+  browser: AppBrowser;
+};
 
 export type AppLinkParams = {
   delegation: string;
@@ -56,17 +63,14 @@ export class InternetIdentityReactNative implements IdentityProvider {
     if (!this._key) throw new Error("init must be called before this method");
 
     try {
-      this.config.inAppBrowser.close();
-
+      this.config.browser.close();
       const derKey = toHex(this._key.getPublicKey().toDer());
 
-      // Open a new window with the IDP provider.
       const url = new URL(this.config.providerUrl);
       url.searchParams.set("redirect_uri", encodeURIComponent(this.config.appLink));
-
       url.searchParams.set("pubkey", derKey);
 
-      this.config.inAppBrowser.open(url.toString());
+      this.config.browser.open(url.toString());
     } catch (error) {
       throw error;
     }

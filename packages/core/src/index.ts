@@ -1,3 +1,3 @@
 export * from "./client";
-export * from "./identity-providers";
+export * from "./identity";
 export * from "./storage";

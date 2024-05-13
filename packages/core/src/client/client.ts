@@ -5,6 +5,7 @@ import { EventEmitter as EventManager } from "events";
 import restClient, { RestClientInstance } from "@bundly/ares-rest";
 
 import { EventEmitter, EventListener } from "../events";
+import { IdentityManager, IdentityProvider } from "../identity";
 import { ClientStorageInterface, LocalStorage } from "../storage";
 import * as url from "../utils/url";
 import { AgentNotDefinedError, CanisterDoesNotExistError, ProviderNotFoundError } from "./client.errors";
@@ -15,8 +16,6 @@ import {
   GetIdentitiesResult,
   IdentityProviders,
 } from "./client.types";
-import { IdentityManager } from "./identity-manager";
-import { IdentityProvider } from "./identity-provider";
 
 export class Client {
   private identityManager: IdentityManager;
@@ -97,7 +96,7 @@ export class Client {
 
   // TODO: Options should be optional?
   public getCandidActor(name: string, identity: Identity, options?: GetCandidActorOptions): ActorSubclass {
-    const canister = this.config.candidCanisters?.get(name);
+    const canister = this.config.candidCanisters?.[name];
 
     if (!canister) {
       throw new CanisterDoesNotExistError(name);
@@ -120,7 +119,7 @@ export class Client {
   }
 
   public getRestActor(name: string, identity: Identity): RestClientInstance {
-    const canister = this.config.restCanisters?.get(name);
+    const canister = this.config.restCanisters?.[name];
 
     if (!canister) {
       throw new CanisterDoesNotExistError(name);

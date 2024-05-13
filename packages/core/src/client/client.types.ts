@@ -1,8 +1,8 @@
 import { ActorConfig, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { IDL } from "@dfinity/candid";
 
+import { IdentityProvider } from "../identity/identity-provider";
 import { ClientStorageInterface } from "../storage/storage.interface";
-import { IdentityProvider } from "./identity-provider";
 
 export type GetIdentitiesResult = {
   identity: Identity;
@@ -23,17 +23,17 @@ export type RestCanister = {
 
 export type CreateClientConfig = {
   agentConfig?: HttpAgentOptions;
-  candidCanisters?: Map<string, CandidCanister>;
+  candidCanisters?: Record<string, CandidCanister>;
+  restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
-  restCanisters?: Map<string, RestCanister>;
   storage?: ClientStorageInterface;
 };
 
 export type ClientConfig = {
   agentConfig?: HttpAgentOptions;
-  candidCanisters?: Map<string, CandidCanister>;
+  candidCanisters?: Record<string, CandidCanister>;
+  restCanisters?: Record<string, RestCanister>;
   providers?: IdentityProviders;
-  restCanisters?: Map<string, RestCanister>;
   storage: ClientStorageInterface;
 };
 
