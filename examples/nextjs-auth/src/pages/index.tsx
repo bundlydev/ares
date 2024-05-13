@@ -1,59 +1,68 @@
-import { InternetIdentityButton, LogoutButton, useIdentities } from "@bundly/ares-react";
+import { Identity } from "@dfinity/agent";
 
-function onLoginError(error: Error) {
-  console.error("Login error", error);
-}
+import { LogoutButton, useAuth, useIdentities } from "@bundly/ares-react";
+
+import Header from "@app/components/header";
 
 export default function IcConnectPage() {
+  const { isAuthenticated, currentIdentity, changeCurrentIdentity } = useAuth();
   const identities = useIdentities();
 
+  function formatPrincipal(principal: string): string {
+    const parts = principal.split("-");
+    const firstPart = parts.slice(0, 2).join("-");
+    const lastPart = parts.slice(-2).join("-");
+    return `${firstPart}-...-${lastPart}`;
+  }
+
+  function disableIdentityButton(identityButton: Identity): boolean {
+    return currentIdentity.getPrincipal().toString() === identityButton.getPrincipal().toString();
+  }
+
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-4">Ares Connect</h1>
-      <div className="flex justify-between mb-4">
-        <InternetIdentityButton onError={onLoginError} />
-      </div>
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
-          <tr>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Provider
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Principal
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {identities.map((item, index) => {
-            return (
-              <tr key={index} className="hover:bg-gray-100">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">{item.provider}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-lg font-medium text-gray-900">
-                    {item.identity.getPrincipal().toString()}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <LogoutButton identity={item.identity} />
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-      <p className="mt-4 text-sm text-gray-500">Total de identidades: {identities.length}</p>
-    </div>
+    <>
+      <Header />
+      <main className="p-6">
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-2">User Info</h2>
+              <p className="mt-4 text-sm text-gray-500">
+                <strong>Status:</strong> {isAuthenticated ? "Authenticated" : "Not Authenticated"}
+              </p>
+              <p className="text-gray-700">
+                <strong>Current Identity:</strong> {currentIdentity.getPrincipal().toString()}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold mb-2">Identities</h2>
+              <ul className="divide-y divide-gray-200">
+                {identities.map((identity, index) => (
+                  <li key={index} className="flex items-center justify-between py-4">
+                    <span className="text-gray-900">
+                      {formatPrincipal(identity.identity.getPrincipal().toString())}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        className={`px-3 py-1 text-sm rounded-md ${
+                          disableIdentityButton(identity.identity)
+                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            : "bg-blue-500 text-white"
+                        }`}
+                        disabled={disableIdentityButton(identity.identity)}
+                        onClick={() => changeCurrentIdentity(identity.identity)}>
+                        Select
+                      </button>
+                      <LogoutButton identity={identity.identity} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </>
   );
 }
