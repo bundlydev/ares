@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@bundly/ares-core": "0.2.0-beta.10",
-    "@bundly/ares-react": "^0.2.0-beta.8",
+    "@bundly/ares-react": "^0.2.0-beta.9",
     "@dfinity/agent": "^1.3.0",
     "@dfinity/auth-client": "^1.3.0",
     "@dfinity/identity": "^1.3.0",
