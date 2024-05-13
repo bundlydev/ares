@@ -1,4 +1,4 @@
-import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity, SignIdentity } from "@dfinity/agent";
+import { Actor, ActorSubclass, HttpAgent, HttpAgentOptions, Identity } from "@dfinity/agent";
 import { DelegationChain } from "@dfinity/identity";
 import { EventEmitter as EventManager } from "events";
 
@@ -13,14 +13,12 @@ import {
   CreateClientConfig,
   GetCandidActorOptions,
   GetIdentitiesResult,
-  IdentityMap,
   IdentityProviders,
 } from "./client.types";
 import { IdentityManager } from "./identity-manager";
 import { IdentityProvider } from "./identity-provider";
 
 export class Client {
-  private identities: IdentityMap = new Map();
   private identityManager: IdentityManager;
   public eventEmitter: EventEmitter;
   public eventListener: EventListener;
@@ -36,7 +34,12 @@ export class Client {
   }
 
   public async init(): Promise<void> {
-    await this.loadStoredIdentities();
+    await this.identityManager.init();
+    const keyIdentity = this.identityManager.getKeyIdentity();
+
+    // Initialize all providers
+    const providerInits = this.getProviders().map((provider) => provider.init(this, keyIdentity));
+    await Promise.all(providerInits);
   }
 
   private createAgent(options: HttpAgentOptions): HttpAgent {
@@ -48,19 +51,10 @@ export class Client {
     return agent;
   }
 
-  private async loadStoredIdentities(): Promise<void> {
-    const identities = await this.identityManager.getAll();
+  public async getIdentities(): Promise<GetIdentitiesResult> {
+    const storedIdentities = await this.identityManager.getIdentities();
 
-    identities.forEach((values, principal) => {
-      this.identities.set(principal, {
-        identity: values.identity,
-        provider: values.provider,
-      });
-    });
-  }
-
-  public getIdentities(): GetIdentitiesResult {
-    const identities = Array.from(this.identities.values()).map(({ identity, provider }) => {
+    const identities = Array.from(storedIdentities.values()).map(({ identity, provider }) => {
       return {
         identity,
         provider,
@@ -70,18 +64,9 @@ export class Client {
     return identities;
   }
 
-  public async addIdentity(
-    identity: SignIdentity,
-    delegationChain: DelegationChain,
-    provider: string
-  ): Promise<void> {
+  public async addDelegationChain(chain: DelegationChain, provider: string): Promise<void> {
     try {
-      const delegationIdentity = await this.identityManager.persist(identity, delegationChain, provider);
-
-      this.identities.set(delegationIdentity.getPrincipal().toString(), {
-        identity: delegationIdentity,
-        provider,
-      });
+      const delegationIdentity = await this.identityManager.addDelegationChain(chain, provider);
 
       this.eventEmitter.identityAdded(delegationIdentity, provider);
     } catch (error) {
@@ -90,8 +75,7 @@ export class Client {
   }
 
   public async removeIdentity(identity: Identity): Promise<void> {
-    await this.identityManager.remove(identity);
-    this.identities.delete(identity.getPrincipal().toString());
+    await this.identityManager.removeIdentity(identity);
     this.eventEmitter.identityRemoved(identity);
   }
 

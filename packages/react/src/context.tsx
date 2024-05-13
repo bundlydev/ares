@@ -38,7 +38,7 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
     await client.init();
     setListeners(client);
 
-    const storedIdentities = client.getIdentities();
+    const storedIdentities = await client.getIdentities();
     setIdentities(storedIdentities);
     const identity = storedIdentities[0]?.identity || new AnonymousIdentity();
     const isAuthenticated = !identity.getPrincipal().isAnonymous();
@@ -49,14 +49,15 @@ export const IcpConnectContextProvider = (props: IcpConnectContextProviderProps)
   }
 
   function setListeners(client: Client) {
-    client.eventListener.onIdentityAdded((payload) => {
-      setIdentities(client.getIdentities());
+    client.eventListener.onIdentityAdded(async (payload) => {
+      const identities = await client.getIdentities();
+      setIdentities(identities);
       setCurrentIdentity(payload.identity);
       setIsAuthenticated(true);
     });
 
-    client.eventListener.onIdentityRemoved((payload) => {
-      const newIdentities = client.getIdentities();
+    client.eventListener.onIdentityRemoved(async (payload) => {
+      const newIdentities = await client.getIdentities();
 
       setIdentities(newIdentities);
 

@@ -1,4 +1,4 @@
-import { useClient, useProvider } from "hooks";
+import { useProvider } from "hooks";
 import React, { CSSProperties } from "react";
 
 export type InternetIdentityButtonProps = {
@@ -10,11 +10,8 @@ export type InternetIdentityButtonProps = {
 
 export function InternetIdentityButton(props: InternetIdentityButtonProps) {
   const provider = useProvider("internet-identity");
-  const client = useClient();
 
   async function login() {
-    await provider.init(client);
-
     try {
       await provider.connect();
       props.onSuccess?.();
