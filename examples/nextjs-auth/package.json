@@ -7,11 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rm -rf .next && rm -rf .turbo && rm -rf build && rm -rf src/declarations && rm -rf node_modules"
+    "clean": "rm -rf .next && rm -rf .turbo && rm -rf build && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ares-core": "0.2.0-beta.9",
-    "@bundly/ares-react": "^0.2.0-beta.8",
+    "@bundly/ares-core": "0.2.0-beta.10",
+    "@bundly/ares-react": "^0.2.0-beta.9",
     "@dfinity/agent": "^1.3.0",
     "next": "14.2.3",
     "react": "^18.3.1",

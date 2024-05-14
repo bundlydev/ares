@@ -1,3 +1,9 @@
+# Node
 node_modules
-.DS_Store
+
+# Turbo
 .turbo
+
+# VSC
+.vscode/*
+!.vscode/settings.json
