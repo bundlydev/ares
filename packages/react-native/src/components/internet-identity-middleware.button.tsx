@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "react-native";
 
-import { useClient, useProvider } from "@bundly/ares-react";
+import { useProvider } from "@bundly/ares-react";
 
 export type LoginButtonProps = {
   title?: string;
@@ -9,9 +9,8 @@ export type LoginButtonProps = {
   onError?: (error: any) => void;
 };
 
-export function InternetIdentityButton(props: LoginButtonProps) {
-  const provider = useProvider("internet-identity");
-  const client = useClient();
+export function InternetIdentityMidlewareButton(props: LoginButtonProps) {
+  const provider = useProvider("internet-identity-midleware");
 
   async function login() {
     try {

@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ares-react-native",
-  "version": "0.2.0-beta.0",
+  "version": "0.2.0-beta.1",
   "description": "Welcome to ic-react-native!",
   "author": "Bundly",
   "license": "MIT",
@@ -33,8 +33,8 @@
     "@dfinity/auth-client": "^1.3.0",
     "@dfinity/identity": "^1.3.0",
     "@dfinity/principal": "^1.3.0",
-    "@react-native-async-storage/async-storage": "1.21.0",
-    "react-native": "^0.73"
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "react-native": "^0.74.1"
   },
   "devDependencies": {
     "ts-node": "^10.9.2",
