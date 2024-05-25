@@ -4,6 +4,7 @@
 
 - Update types
 - Update dependencies
+- Add CHANGELOG.md
 
 ## [0.1.0] - 2024-02-19
 
