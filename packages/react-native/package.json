@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ares-react-native",
-  "version": "0.2.0-beta.2",
+  "version": "0.2.0",
   "description": "Welcome to ic-react-native!",
   "author": "Bundly",
   "license": "MIT",
@@ -27,8 +27,8 @@
     "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
   },
   "dependencies": {
-    "@bundly/ares-core": "0.2.0-beta.10",
-    "@bundly/ares-react": "^0.2.0-beta.9",
+    "@bundly/ares-core": "0.2.0",
+    "@bundly/ares-react": "^0.2.0",
     "@dfinity/agent": "^1.3.0",
     "@dfinity/auth-client": "^1.3.0",
     "@dfinity/identity": "^1.3.0",

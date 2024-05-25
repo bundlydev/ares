@@ -1,6 +1,6 @@
 {
   "name": "@bundly/ares-rest",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.1",
   "description": "HTTP client for calling REST APIs and seamlessly integrating Internet Identity with them.",
   "author": "Bundly",
   "license": "MIT",
