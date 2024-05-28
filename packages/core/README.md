@@ -1,85 +1,128 @@
 # ares-core
 
-A JavaScript library for interacting with the Internet Computer (IC).
+A JavaScript frontend library for interacting with ICP Backend Canisters and Identity Providers.
+
+**NOTE: This is a Beta version**
 
 ## How to use
 
-Define your Candid Canisters
+To create a Client instance you must call the static method `create` and later you must call the `init` method:
 
-```javascript
-export const cc: Canister = {
-	idlFactory,
-	configuration: {
-		canisterId: "YOUR_CANDID_CANISTER_ID",
-	},
-};
-
-export const candidCanisters = {
-  cc
-};
+```typescript
+const client = Client.create({});
+await client.init();
 ```
 
-Define your Rest Canisters
+### Implement Identity Providers
 
-```javascript
-export const rc: Canister = {
-  baseUrl: "YOUR_API_REST_URL"
-};
+Most implementations use Identity Providers to call canisters with autenticated identities, so its necesary to declare which Identity Providers you want to use:
 
-export const restCanisters = {
-  rc
-};
-```
-
-Create a new client
-
-```javascript
+```typescript
 const client = Client.create({
-  agent: {
-    host: "YOUR_IC_HOST_URL",
-  },
-  candidCanisters,
-  restCanisters,
   providers: [
     new InternetIdentity({
-      providerUrl: process.env.INTERNET_IDENTITY_URL,
+      providerUrl: process.env.NEXT_PUBLIC_INTERNET_IDENTITY_URL!,
     }),
   ],
 });
 ```
 
-Initialize your client
+See following example to start an authentication process:
 
-```javascript
-await client.init();
+```typescript
+const provider = client.getProvider("internet-identity");
+provider.connect();
 ```
 
-## Available Methods
+Then, you can get all the authenticated identities:
 
-### Replace Identity
-
-```javascript
-import { Identity } from '@dfinity/agent';
-
-const identity: Identity = yourIdentity;
-
-await client.replaceIdentity(identity);
+```typescript
+const identities = client.getIdentities();
 ```
 
-### Get current Identity
+### Register Canisters
 
-```javascript
-const identity = client.getIdentity();
+Ares Client supports two kind of Canisters:
+
+- Candid Canisters: Traditional Canisters that you can build according the Internet Computer Protocol
+- Http Canisters: Canisters Build according the HTTP Gateway Protocol, **this is an Experimental feature**.
+
+To use candid canisters you can follow the example below:
+
+```typescript
+
+import { _SERVICE, idlFactory } from "path_to_canister_declarations/test.did.js";
+
+export const candidTest: Canister = {
+	idlFactory,
+	configuration: {
+		canisterId: "TEST_CANDID_CANISTER_ID",
+	},
+};
+
+const client = Client.create({
+  agentConfig: {
+    host: "IC_HOST_URL",
+  },
+  ...
+  candidCanisters: {
+    candidTest
+  }
+});
+
+const candidActor = client.getCandidActor("candidTest");
 ```
 
-### Get Candid Actor
+To use http canisters you can follow the example below:
 
-```javascript
-const candidActor = client.getCandidActor("CANDID_ACTOR_NAME");
+```typescript
+export const httpTest: Canister = {
+  baseUrl: "API_REST_URL"
+};
+
+const client = Client.create({
+  ...
+  restCanisters: {
+    httpTest
+  }
+});
+
+const candidActor = client.getRestActor("httpTest");
 ```
 
-### Get Rest Actor
+You can use both canisters (candid and http) at the same time:
 
-```javascript
-const candidActor = client.getRestActor("REST_ACTOR_NAME");
+```typescript
+const client = Client.create({
+  agentConfig: {
+    host: "IC_HOST_URL",
+  },
+  ...
+  candidCanisters: {
+    candidTest
+  },
+  restCanisters: {
+    httpTest
+  }
+});
+```
+
+## Advanced features
+
+### Build CustomProviders
+
+Ares defines some prebuild Identity Providers, but if you like to implement your own, you neet to create a class that implements the `IdentityProvider` interface:
+
+```typescript
+export class MyCustomIdentityProvider implements IdentityProvider {}
+```
+
+For a complete implementation you can see how the `InternetIdentity` provider is built.
+
+### Use Custom Storage
+
+You can define custom storage (where identities and some configurations will be stored), for that, yo need to create a class that implements the `ClientStorageInterface`:
+
+```typescript
+class MyCustomStorage implements ClientStorageInterface {}
 ```

@@ -2,7 +2,7 @@
   <img src="/public/logo-ares.svg" style="width: 400px; margin: 0 auto;" >
 </p>
 
-Javascript libraries to help your web and mobile JS/TS applications communicate to Internet Computer Protocol canisters and Internet Identity.
+Javascript libraries to help your web and mobile JS/TS applications communicate to ICP Backend Canisters and Identity Providers.
 
 ## Badges
 
@@ -23,21 +23,21 @@ Contributors are welcome. While we don't have a formal process for proposals, yo
 
 ## Library Packages Content
 
-1. **ares-rest**
+### ares-core
+
+A JavaScript frontend library for interacting with ICP Backend Canisters and Identity Providers.
+
+### ares-react
+
+`ares-core` wrapper for React applications and provides a components for ease of use.
+
+### ares-react-native
+
+Provides Internet Identity Middleware provider and Auth Buttons to enable the Internet Identity integration for React Native Apps.
+
+### ares-rest (experimental)
 
 HTTP client for calling REST APIs and seamlessly integrating Internet Identity with them.
-
-2. **ares-core**
-
-A JavaScript library for interacting with the Internet Computer (IC) and identity providers.
-
-3. **ares-react**
-
-Wrapps `ares-core` for React applications and provides a components for ease of use.
-
-4. **ares-react-native**
-
-Provides Internet Identity Middleware provider and AuthButton to enable the Internet Identity integration for React Native Apps.
 
 ## How to use
 

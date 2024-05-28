@@ -2,7 +2,7 @@
 
 HTTP client for calling REST APIs and seamlessly integrating Internet Identity with them.
 
-**NOTE: This is a Beta version**
+**NOTE: This is an Experimental version**
 
 ## How to use
 
