@@ -1,7 +1,6 @@
 {
-  "name": "@bundly/ic-connect-js",
-  "version": "0.4.2",
-  "description": "Monorepo for ic-connectors",
+  "name": "@bundly/ares",
+  "description": "Javascript libraries to help your web and mobile JS/TS applications communicate to Internet Computer Protocol canisters and Internet Identity.",
   "author": "Bundly",
   "license": "MIT",
   "private": true,
@@ -17,16 +16,17 @@
     "Typescript"
   ],
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "build": "turbo run build",
-    "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "clean": "turbo run clean && rm -rf node_modules && rm -rf .turbo"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "prettier": "^3.2.4",
-    "turbo": "^1.11.3"
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.3"
   }
 }

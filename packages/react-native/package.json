@@ -1,0 +1,44 @@
+{
+  "name": "@bundly/ares-react-native",
+  "version": "0.2.0",
+  "description": "Welcome to ic-react-native!",
+  "author": "Bundly",
+  "license": "MIT",
+  "private": false,
+  "homepage": "https://github.com/bundlydev/ic-connect-js#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bundlydev/ic-connect-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bundlydev/ic-connect-js/issues"
+  },
+  "keywords": [],
+  "main": "./build/index.js",
+  "module": "./build/index.mjs",
+  "types": "./build/index.d.ts",
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prenpm:publish": "npm run build",
+    "npm:publish": "sh ../../scripts/publish.sh",
+    "clean": "rm -rf build && rm -rf .turbo && rm -rf node_modules"
+  },
+  "dependencies": {
+    "@bundly/ares-core": "0.2.0",
+    "@bundly/ares-react": "^0.2.0",
+    "@dfinity/agent": "^1.3.0",
+    "@dfinity/auth-client": "^1.3.0",
+    "@dfinity/identity": "^1.3.0",
+    "@dfinity/principal": "^1.3.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
+    "react-native": "^0.74.1"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  }
+}

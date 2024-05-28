@@ -7,8 +7,9 @@
   "semi": true,
   "printWidth": 110,
   "arrowParens": "always",
+  "tabWidth": 2,
   "endOfLine": "auto",
-  "importOrder": ["<THIRD_PARTY_MODULES>", "^@bundly/*", "^@/*", "^[./]"],
+  "importOrder": ["<THIRD_PARTY_MODULES>", "^@bundly/*", "^@app/*", "^[./]"],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
   "plugins": ["@trivago/prettier-plugin-sort-imports"]

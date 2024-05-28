@@ -2,17 +2,18 @@
   <img src="/public/logo-ares.svg" style="width: 400px; margin: 0 auto;" >
 </p>
 
-Javascript libraries to help your frontend and native JS applications communicate to Internet Computer Protocol canisters and Internet Identity.
+Javascript libraries to help your web and mobile JS/TS applications communicate to ICP Backend Canisters and Identity Providers.
 
 ## Badges
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
-| Library    | Version                                                         | Library         | Version                                                              |
-| ---------- | --------------------------------------------------------------- | --------------- | -------------------------------------------------------------------- |
-| ic-core-js | ![npm version](https://img.shields.io/npm/v/@bundly/ic-core-js) | ic-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react-native) |
-| ic-react   | ![npm version](https://img.shields.io/npm/v/@bundly/ic-react)   | ic-http-client  | ![npm version](https://img.shields.io/npm/v/@bundly/ic-http-client)  |
-| ares       | ![npm version](https://img.shields.io/npm/v/@bundly/ares)       |
+| Library           | Version                                                                |
+| ----------------- | ---------------------------------------------------------------------- |
+| ares-core         | ![npm version](https://img.shields.io/npm/v/@bundly/ares-core)         |
+| ares-react-native | ![npm version](https://img.shields.io/npm/v/@bundly/ares-react-native) |
+| ares-react        | ![npm version](https://img.shields.io/npm/v/@bundly/ares-react)        |
+| ares-rest         | ![npm version](https://img.shields.io/npm/v/@bundly/ares-rest)         |
 
 ## Overview
 
@@ -22,39 +23,33 @@ Contributors are welcome. While we don't have a formal process for proposals, yo
 
 ## Library Packages Content
 
-1. **ic-core-js**
+### ares-core
 
-Includes :
+A JavaScript frontend library for interacting with ICP Backend Canisters and Identity Providers.
 
-- Client class that abstracts canister communication.
-- Identity Provider Interface defines the methods that should have all identity providers.
-- Internet Identity Provider is a class that implements authentication with Internet Identity implementing the methods declared in Identity Provider Interface.
+### ares-react
 
-2. **ic-react**
+`ares-core` wrapper for React applications and provides a components for ease of use.
 
-Wrapps `ic-core-js` for React applications and provides a context and hooks for ease of use.
+### ares-react-native
 
-3. **ic-react-native**
+Provides Internet Identity Middleware provider and Auth Buttons to enable the Internet Identity integration for React Native Apps.
 
-Includes Internet Identity Middleware provider and AuthButton to enable the Internet Identity integration for React Native Apps.
+### ares-rest (experimental)
 
-4. **ic-http-client**
-   TBD
-
-5. **ares**
-   TBD
+HTTP client for calling REST APIs and seamlessly integrating Internet Identity with them.
 
 ## How to use
 
-Please visit the dedicated **READ.ME** file for each package.
+Please visit the dedicated **README.ME** file for each package.
 
-ic-core-js [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ic-core-js/README.md)
+ares-rest [README.ME](https://github.com/bundlydev/ares/blob/main/packages/ares-rest/README.md)
 
-ic-react [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ic-react/README.md)
+ares-core [README.ME](https://github.com/bundlydev/ares/blob/main/packages/ares-core/README.md)
 
-ic-react-native [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ic-react-native/README.md)
+ares-react [README.ME](https://github.com/bundlydev/ares/blob/main/packages/ares-react/README.md)
 
-ares [READ.ME](https://github.com/bundlydev/ic-connect-js/blob/main/packages/ares/README.md)
+ares-react-native [README.ME](https://github.com/bundlydev/ares/blob/main/packages/ares-react-native/README.md)
 
 ## Glossary
 
